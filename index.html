@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis Office</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0F0F0F;
+  --surface: #1A1A1A;
+  --surface2: #222222;
+  --border: #2A2A2A;
+  --border2: #333333;
+  --text: #E8E6E0;
+  --text2: #888780;
+  --text3: #555350;
+  --accent: #7B6EF6;
+  --accent-dim: #2D2860;
+  --green: #4ADE80;
+  --green-dim: #14532D;
+  --amber: #FBB040;
+  --amber-dim: #451A03;
+  --red: #F87171;
+  --red-dim: #3B0A0A;
+  --font: 'IBM Plex Sans Thai', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* TOP NAV */
+.topnav { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; height: 48px; flex-shrink: 0; }
+.logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; margin-right: 24px; }
+.nav-tabs { display: flex; gap: 0; flex: 1; }
+.nav-tab { padding: 0 16px; height: 48px; display: flex; align-items: center; font-size: 13px; font-weight: 400; color: var(--text2); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-label { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+
+/* MAIN LAYOUT */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar { width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+.sidebar-section { padding: 12px 8px 4px; }
+.sidebar-label { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; padding: 0 8px 6px; font-family: var(--mono); }
+.agent-btn { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; border: none; background: none; cursor: pointer; text-align: left; transition: background 0.1s; }
+.agent-btn:hover { background: var(--surface2); }
+.agent-btn.active { background: var(--accent-dim); }
+.agent-emoji { width: 26px; height: 26px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.agent-info { flex: 1; min-width: 0; }
+.agent-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.agent-role { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-idle { background: var(--text3); }
+.dot-working { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
+.dot-done { background: var(--green); }
+
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+
+/* CONTENT AREA */
+.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* PAGE VIEWS */
+.page { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+.page.active { display: flex; }
+
+/* JARVIS CHAT */
+.chat-wrap { display: flex; flex-direction: column; height: 100%; }
+.chat-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.chat-title { display: flex; align-items: center; gap: 10px; }
+.chat-title h2 { font-size: 15px; font-weight: 500; }
+.chat-title p { font-size: 12px; color: var(--text2); }
+.copy-ctx { font-size: 11px; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border2); background: none; color: var(--text2); cursor: pointer; font-family: var(--mono); transition: all 0.1s; }
+.copy-ctx:hover { border-color: var(--accent); color: var(--accent); }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.msg { display: flex; gap: 10px; max-width: 80%; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-av { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; background: var(--surface2); }
+.msg.user .msg-av { background: var(--accent-dim); }
+.bubble { padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.65; }
+.msg.ai .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 10px 10px 10px; }
+.msg.user .bubble { background: var(--accent-dim); border: 1px solid var(--accent); color: var(--text); border-radius: 10px 4px 10px 10px; }
+
+.typing { display: flex; align-items: center; gap: 4px; padding: 12px 14px; }
+.typing span { width: 5px; height: 5px; background: var(--text3); border-radius: 50%; animation: bounce 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+.quick-btns { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 20px 10px; flex-shrink: 0; }
+.qbtn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border2); background: none; color: var(--text2); cursor: pointer; transition: all 0.1s; font-family: var(--font); }
+.qbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.input-row { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
+textarea.chat-input { flex: 1; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-size: 14px; font-family: var(--font); resize: none; outline: none; background: var(--surface); color: var(--text); max-height: 100px; line-height: 1.5; }
+textarea.chat-input:focus { border-color: var(--accent); }
+textarea.chat-input::placeholder { color: var(--text3); }
+.send-btn { width: 38px; height: 38px; border-radius: 8px; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.1s; }
+.send-btn:hover { background: #6B5EE6; }
+.send-btn:disabled { background: var(--border2); cursor: not-allowed; }
+.send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+/* STOCK PAGE */
+.stock-page { display: flex; height: 100%; }
+.stock-sidebar { width: 260px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.stock-header { padding: 16px; border-bottom: 1px solid var(--border); }
+.stock-header h2 { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.stock-header p { font-size: 11px; color: var(--text2); }
+.stock-list { flex: 1; overflow-y: auto; padding: 8px; }
+.stock-section-label { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 4px; font-family: var(--mono); }
+.stock-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 2px; }
+.stock-item:hover { background: var(--surface2); }
+.stock-name { font-size: 13px; color: var(--text); }
+.qty { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-family: var(--mono); }
+.qty.low { background: var(--red-dim); color: var(--red); }
+.qty.medium { background: var(--amber-dim); color: var(--amber); }
+.qty.good { background: var(--green-dim); color: var(--green); }
+.stock-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 30px 16px; line-height: 1.8; }
+.quick-add-stock { padding: 10px; border-top: 1px solid var(--border); }
+.quick-add-stock input { width: 100%; padding: 8px 10px; border: 1px solid var(--border2); border-radius: 6px; font-size: 13px; background: var(--surface2); color: var(--text); outline: none; font-family: var(--font); }
+.quick-add-stock input:focus { border-color: var(--accent); }
+.quick-add-stock input::placeholder { color: var(--text3); }
+
+/* LOG PAGE */
+.log-page { padding: 20px; overflow-y: auto; flex: 1; }
+.log-page h2 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+.log-day { margin-bottom: 20px; }
+.log-date-label { font-size: 11px; font-weight: 500; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono); padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.log-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; }
+.log-agent { font-size: 11px; color: var(--accent); font-family: var(--mono); margin-bottom: 3px; }
+.log-task { font-size: 13px; color: var(--text); line-height: 1.5; }
+.log-result { font-size: 12px; color: var(--green); margin-top: 4px; }
+.log-time { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
+.log-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 40px; line-height: 1.8; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-family: var(--mono); }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="logo">JARVIS // OFFICE</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('jarvis', this)">⚡ Jarvis</button>
+    <button class="nav-tab" onclick="switchPage('stock', this)">🧊 สต็อก</button>
+    <button class="nav-tab" onclick="switchPage('log', this)">📋 Work Log</button>
+  </div>
+  <div class="nav-right">
+    <div class="status-dot"></div>
+    <div class="status-label">ONLINE</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SIDEBAR: TEAM -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">ทีม AI</div>
+      <button class="agent-btn active" onclick="selectAgent('jarvis', this)">
+        <div class="agent-emoji">🤖</div>
+        <div class="agent-info"><div class="agent-name">Jarvis</div><div class="agent-role">Chief of Staff</div></div>
+        <div class="agent-status-dot dot-done" id="dot-jarvis"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('rex', this)">
+        <div class="agent-emoji">🔍</div>
+        <div class="agent-info"><div class="agent-name">Rex</div><div class="agent-role">Research</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-rex"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('mia', this)">
+        <div class="agent-emoji">✍️</div>
+        <div class="agent-info"><div class="agent-name">Mia</div><div class="agent-role">Content</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-mia"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('axel', this)">
+        <div class="agent-emoji">📊</div>
+        <div class="agent-info"><div class="agent-name">Axel</div><div class="agent-role">Ads & Analytics</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-axel"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('iris', this)">
+        <div class="agent-emoji">👥</div>
+        <div class="agent-info"><div class="agent-name">Iris</div><div class="agent-role">HR</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-iris"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('leo', this)">
+        <div class="agent-emoji">💰</div>
+        <div class="agent-info"><div class="agent-name">Leo</div><div class="agent-role">Finance</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-leo"></div>
+      </button>
+      <button class="agent-btn" onclick="selectAgent('quinn', this)">
+        <div class="agent-emoji">✅</div>
+        <div class="agent-info"><div class="agent-name">Quinn</div><div class="agent-role">QA</div></div>
+        <div class="agent-status-dot dot-idle" id="dot-quinn"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- JARVIS PAGE -->
+    <div class="page active" id="page-jarvis">
+      <div class="chat-wrap">
+        <div class="chat-header">
+          <div class="chat-title">
+            <div>
+              <h2 id="chat-agent-name">Jarvis — Chief of Staff</h2>
+              <p id="chat-agent-desc">สั่งงานได้เลย Jarvis จะแจกงานให้ทีมและติดตามผล</p>
+            </div>
+          </div>
+          <button class="copy-ctx" onclick="copyContext()">[ copy context ]</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg ai">
+            <div class="msg-av">🤖</div>
+            <div class="bubble">สวัสดีครับ! ผม Jarvis พร้อมทำงานแล้ว 👋<br><br>ทีมของเรามี Rex, Mia, Axel, Iris, Leo และ Quinn<br>4 ช่องทางรายได้: Shopee Link, TikTok อาหาร, Shopee VDO, TikTok สุขภาพ<br><br>สั่งงานได้เลยครับ</div>
+          </div>
+        </div>
+        <div class="quick-btns">
+          <button class="qbtn" onclick="sendQuick('สรุปงานค้างทั้งหมดให้หน่อย')">งานค้าง</button>
+          <button class="qbtn" onclick="sendQuick('Rex หาสินค้า affiliate ที่กำลังเทรนด์ TikTok ตอนนี้')">Rex หาสินค้า</button>
+          <button class="qbtn" onclick="sendQuick('Mia เขียนสคริปต์ value content ช่องอาหาร')">Mia สคริปต์</button>
+          <button class="qbtn" onclick="sendQuick('Axel สรุปผลสัปดาห์นี้ทุกช่องทาง')">Axel สรุปผล</button>
+          <button class="qbtn" onclick="sendQuick('Quinn ตรวจงานที่รอ approve อยู่')">Quinn ตรวจ</button>
+        </div>
+        <div class="input-row">
+          <textarea class="chat-input" id="chatInput" placeholder="สั่งงาน Jarvis ได้เลย..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK PAGE -->
+    <div class="page" id="page-stock">
+      <div class="stock-page">
+        <div class="stock-sidebar">
+          <div class="stock-header">
+            <h2>🧊 สต็อกตู้เย็น</h2>
+            <p>อัพเดทอัตโนมัติจากการคุย</p>
+          </div>
+          <div class="stock-list" id="stockList">
+            <div class="stock-empty">ยังไม่มีสต็อก<br>บอก Mia ว่ามีอะไรในตู้เย็น</div>
+          </div>
+          <div class="quick-add-stock">
+            <input type="text" id="quickAddStock" placeholder="เพิ่มเร็ว เช่น ไข่ 6 ฟอง" onkeydown="if(event.key==='Enter')quickAddStockItem()">
+          </div>
+        </div>
+        <div class="chat-wrap" style="flex:1">
+          <div class="chat-header">
+            <div class="chat-title">
+              <div><h2>Mia — ผู้ช่วยครัว</h2><p>บอกได้เลยว่ามีอะไร ทำอะไรไป หรืออยากทำเมนูอะไร</p></div>
+            </div>
+          </div>
+          <div class="chat-messages" id="stockMessages">
+            <div class="msg ai">
+              <div class="msg-av">✍️</div>
+              <div class="bubble">สวัสดีครับ! ผม Mia ผู้ช่วยครัว 🙌<br><br>บอกผมได้เลยว่า<br>• ตู้เย็นมีอะไรบ้าง<br>• วันนี้ทำเมนูอะไร ใช้อะไรไปบ้าง<br>• อยากทำเมนูอะไร ต้องซื้อเพิ่มอะไร</div>
+            </div>
+          </div>
+          <div class="quick-btns">
+            <button class="qbtn" onclick="sendStockQuick('วันนี้ทำอะไรดี จากของที่มีในตู้เย็น?')">วันนี้ทำอะไรดี?</button>
+            <button class="qbtn" onclick="sendStockQuick('ต้องซื้ออะไรเพิ่มบ้าง?')">ต้องซื้ออะไร?</button>
+            <button class="qbtn" onclick="sendStockQuick('แนะนำเมนูสำหรับคลิป TikTok จากของที่มี')">เมนูสำหรับคลิป</button>
+          </div>
+          <div class="input-row">
+            <textarea class="chat-input" id="stockInput" placeholder="บอก Mia ได้เลย..." rows="1"
+              onkeydown="handleStockKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="stockSendBtn" onclick="sendStockMessage()">
+              <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG PAGE -->
+    <div class="page" id="page-log">
+      <div class="log-page">
+        <h2>📋 Work Log</h2>
+        <div id="logList"><div class="log-empty">ยังไม่มี work log<br>เริ่มสั่งงาน Jarvis ได้เลย</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+let stock = load('jo_stock', {});
+let workLog = load('jo_worklog', []);
+let agentStatus = load('jo_agent_status', {
+  jarvis:{status:'done',task:''}, rex:{status:'idle',task:''}, mia:{status:'idle',task:''},
+  axel:{status:'idle',task:''}, iris:{status:'idle',task:''}, leo:{status:'idle',task:''}, quinn:{status:'idle',task:''}
+});
+let chatHistory = [];
+let stockHistory = [];
+let currentAgent = 'jarvis';
+
+const AGENTS = {
+  jarvis:{name:'Jarvis — Chief of Staff', desc:'สั่งงานได้เลย Jarvis จะแจกงานให้ทีมและติดตามผล', emoji:'🤖'},
+  rex:{name:'Rex — Research Agent', desc:'หาสินค้า เทรนด์ วิเคราะห์คู่แข่ง', emoji:'🔍'},
+  mia:{name:'Mia — Content Agent', desc:'เขียนสคริปต์ แคปชั่น ไอเดียคลิป', emoji:'✍️'},
+  axel:{name:'Axel — Ads & Analytics', desc:'ยิงแอด ติดตามผล optimize', emoji:'📊'},
+  iris:{name:'Iris — HR Agent', desc:'ติดตามพนักงาน เอกสาร KPI', emoji:'👥'},
+  leo:{name:'Leo — Finance Agent', desc:'บัญชี รายรับ-รายจ่าย คอมมิชชั่น', emoji:'💰'},
+  quinn:{name:'Quinn — QA Agent', desc:'ตรวจสอบงานก่อน publish', emoji:'✅'},
+};
+
+const AGENT_PROMPTS = {
+  jarvis: `คุณคือ Jarvis หัวหน้าทีม AI สำหรับธุรกิจ Affiliate Marketing
+ทีม: Rex(Research), Mia(Content), Axel(Ads&Analytics), Iris(HR), Leo(Finance), Quinn(QA)
+4 ช่องทาง: 1.Shopee Link Facebook 2.TikTok ช่องอาหาร(sale+value content) 3.Shopee VDO 4.TikTok ช่องสุขภาพ AI
+ตอบกระชับ เป็นกันเอง ภาษาไทย
+เมื่อมอบหมายงานหรืออัพเดทสถานะ แนบ JSON:
+\`\`\`json
+{"logs":[{"agent":"ชื่อ","task":"งาน","result":"ผล"}],"status":{"id":"rex|mia|axel|iris|leo|quinn","s":"idle|working|done","task":"งานสั้น"}}
+\`\`\``,
+  rex: `คุณคือ Rex Research Agent เชี่ยวชาญหาสินค้า affiliate เทรนด์ TikTok/Shopee วิเคราะห์คู่แข่ง คอมมิชชั่น ตอบเป็นภาษาไทย กระชับ`,
+  mia: `คุณคือ Mia Content Agent เขียนสคริปต์ TikTok แคปชั่น Facebook ไอเดียคลิป ช่องอาหารและสุขภาพ ตอบเป็นภาษาไทย`,
+  axel: `คุณคือ Axel Ads & Analytics Agent วิเคราะห์ผลแอด ROAS CTR แนะนำการ optimize ตอบเป็นภาษาไทย`,
+  iris: `คุณคือ Iris HR Agent ติดตามงานพนักงาน สรุป KPI จัดการเอกสาร HR ตอบเป็นภาษาไทย`,
+  leo: `คุณคือ Leo Finance Agent สรุปรายรับ-รายจ่าย ติดตามคอมมิชชั่น affiliate รายงานการเงิน ตอบเป็นภาษาไทย`,
+  quinn: `คุณคือ Quinn QA Agent ตรวจสอบสคริปต์ แคปชั่น ความถูกต้องก่อน publish ตอบเป็นภาษาไทย`,
+};
+
+const MIA_STOCK_PROMPT = `คุณคือ Mia ผู้ช่วยครัวและระบบสต็อกตู้เย็น
+งาน: ติดตามสต็อกวัตถุดิบ แนะนำเมนู บอกว่าต้องซื้อเพิ่มอะไร
+รับภาษาไทยธรรมชาติ ไม่ต้องเป๊ะ
+เมื่ออัพเดทสต็อกหรือบันทึก log แนบ JSON:
+\`\`\`json
+{"stock":[{"name":"ชื่อ","qty":"จำนวน","level":"low|medium|good"}],"log":{"menu":"เมนู","used":["วัตถุดิบ"]}}
+\`\`\`
+qty="หมด" = ลบออกจากสต็อก`;
+
+renderStock(); renderLog(); updateDots();
+
+function switchPage(name, btn) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+}
+
+function selectAgent(id, btn) {
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentAgent = id;
+  const a = AGENTS[id];
+  document.getElementById('chat-agent-name').textContent = a.name;
+  document.getElementById('chat-agent-desc').textContent = a.desc;
+  chatHistory = [];
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = `<div class="msg ai"><div class="msg-av">${a.emoji}</div><div class="bubble">สวัสดีครับ! ผม ${a.name.split(' ')[0]} พร้อมทำงานแล้ว พิมพ์มาได้เลยครับ</div></div>`;
+  switchPage('jarvis', document.querySelector('.nav-tab'));
+}
+
+function updateDots() {
+  Object.entries(agentStatus).forEach(([id, s]) => {
+    const el = document.getElementById('dot-' + id);
+    if (el) { el.className = 'agent-status-dot'; el.classList.add(s.status === 'working' ? 'dot-working' : s.status === 'done' ? 'dot-done' : 'dot-idle'); }
+  });
+}
+
+function getContext() {
+  const today = new Date().toLocaleDateString('th-TH');
+  const todayLogs = workLog.filter(l => l.date === today);
+  return `[Jarvis Context — ${today}]
+สถานะทีม: ${Object.entries(agentStatus).map(([id,s])=>`${id}:${s.status}${s.task?' ('+s.task+')':''}`).join(', ')}
+งานวันนี้: ${todayLogs.length ? todayLogs.map(l=>`${l.agent}:${l.task}`).join(' | ') : 'ยังไม่มี'}`;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; input.style.height = 'auto';
+  addMsg('chatMessages', 'user', text, AGENTS[currentAgent].emoji);
+  chatHistory.push({role:'user', content: text});
+  const btn = document.getElementById('sendBtn'); btn.disabled = true;
+  const typing = showTyping('chatMessages', AGENTS[currentAgent].emoji);
+  try {
+    const ctx = currentAgent === 'jarvis' ? getContext() + '\n\n' : '';
+    const messages = chatHistory.map((m,i) => i===0 ? {role:m.role, content: ctx+m.content} : {role:m.role, content:m.content});
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system: AGENT_PROMPTS[currentAgent], messages})
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'มีปัญหาเล็กน้อย ลองใหม่นะครับ';
+    typing.remove();
+    const clean = processJarvisResponse(reply);
+    addMsg('chatMessages', 'ai', clean, AGENTS[currentAgent].emoji);
+    chatHistory.push({role:'assistant', content:reply});
+  } catch(e) { typing.remove(); addMsg('chatMessages', 'ai', 'เชื่อมต่อไม่ได้ตอนนี้ครับ ลองใหม่', AGENTS[currentAgent].emoji); }
+  btn.disabled = false;
+}
+
+function processJarvisResponse(text) {
+  const match = text.match(/```json\n([\s\S]*?)\n```/);
+  if (match) {
+    try {
+      const d = JSON.parse(match[1]);
+      if (d.logs) d.logs.forEach(l => addLog(l.agent, l.task, l.result||''));
+      if (d.status) { const s = d.status; if (agentStatus[s.id]) { agentStatus[s.id] = {status:s.s, task:s.task||''}; save('jo_agent_status', agentStatus); updateDots(); } }
+    } catch(e) {}
+    return text.replace(/```json\n[\s\S]*?\n```/g,'').trim();
+  }
+  return text;
+}
+
+async function sendStockMessage() {
+  const input = document.getElementById('stockInput');
+  const text = input.value.trim(); if (!text) return;
+  input.value = ''; input.style.height = 'auto';
+  addMsg('stockMessages', 'user', text, '✍️');
+  stockHistory.push({role:'user', content: text});
+  const btn = document.getElementById('stockSendBtn'); btn.disabled = true;
+  const typing = showTyping('stockMessages', '✍️');
+  try {
+    const stockCtx = `[สต็อกปัจจุบัน]\n${Object.values(stock).length ? Object.values(stock).map(i=>`- ${i.name}: ${i.qty}`).join('\n') : 'ว่างเปล่า'}`;
+    const messages = stockHistory.map((m,i) => i===0 ? {role:m.role, content:stockCtx+'\n\n'+m.content} : {role:m.role, content:m.content});
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:MIA_STOCK_PROMPT, messages})
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'มีปัญหาเล็กน้อย ลองใหม่นะครับ';
+    typing.remove();
+    const clean = processStockResponse(reply);
+    addMsg('stockMessages', 'ai', clean, '✍️');
+    stockHistory.push({role:'assistant', content:reply});
+  } catch(e) { typing.remove(); addMsg('stockMessages', 'ai', 'เชื่อมต่อไม่ได้ตอนนี้ครับ ลองใหม่', '✍️'); }
+  btn.disabled = false;
+}
+
+function processStockResponse(text) {
+  const match = text.match(/```json\n([\s\S]*?)\n```/);
+  if (match) {
+    try {
+      const d = JSON.parse(match[1]);
+      if (d.stock) { d.stock.forEach(item => { if (item.qty==='หมด'||item.qty==='0') delete stock[item.name]; else stock[item.name]={name:item.name,qty:item.qty,level:item.level||'medium'}; }); save('jo_stock',stock); renderStock(); }
+      if (d.log && d.log.menu) { const now=new Date(); workLog.unshift({date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),agent:'Mia',task:`ทำเมนู: ${d.log.menu}`,result:`ใช้: ${(d.log.used||[]).join(', ')}`}); save('jo_worklog',workLog); renderLog(); }
+    } catch(e) {}
+    return text.replace(/```json\n[\s\S]*?\n```/g,'').trim();
+  }
+  return text;
+}
+
+function renderStock() {
+  const el = document.getElementById('stockList');
+  const items = Object.values(stock);
+  if (!items.length) { el.innerHTML='<div class="stock-empty">ยังไม่มีสต็อก<br>บอก Mia ว่ามีอะไรในตู้เย็น</div>'; return; }
+  const g = {low:[],medium:[],good:[]};
+  items.forEach(i => (g[i.level]||g.medium).push(i));
+  let html = '';
+  if (g.low.length) html += `<div class="stock-section-label">ใกล้หมด ⚠️</div>${g.low.map(si).join('')}`;
+  if (g.medium.length) html += `<div class="stock-section-label">พอใช้ได้</div>${g.medium.map(si).join('')}`;
+  if (g.good.length) html += `<div class="stock-section-label">เพียงพอ ✓</div>${g.good.map(si).join('')}`;
+  el.innerHTML = html;
+}
+function si(i) { return `<div class="stock-item"><span class="stock-name">${i.name}</span><span class="qty ${i.level}">${i.qty}</span></div>`; }
+
+function renderLog() {
+  const el = document.getElementById('logList');
+  if (!workLog.length) { el.innerHTML='<div class="log-empty">ยังไม่มี work log<br>เริ่มสั่งงาน Jarvis ได้เลย</div>'; return; }
+  const byDate = {};
+  workLog.forEach(l => { if (!byDate[l.date]) byDate[l.date]=[]; byDate[l.date].push(l); });
+  el.innerHTML = Object.entries(byDate).map(([date,entries]) => `
+    <div class="log-day">
+      <div class="log-date-label">${date}</div>
+      ${entries.map(e=>`<div class="log-entry">
+        <div class="log-agent">${e.agent}</div>
+        <div class="log-task">${e.task}</div>
+        ${e.result?`<div class="log-result">→ ${e.result}</div>`:''}
+        <div class="log-time">${e.time||''}</div>
+      </div>`).join('')}
+    </div>`).join('');
+}
+
+function addLog(agent, task, result='') {
+  const now = new Date();
+  workLog.unshift({date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),agent,task,result});
+  if (workLog.length>200) workLog=workLog.slice(0,200);
+  save('jo_worklog',workLog); renderLog();
+}
+
+function addMsg(containerId, role, text, emoji) {
+  const el = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = `<div class="msg-av">${role==='ai'?emoji:'👤'}</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(div); el.scrollTop = el.scrollHeight;
+}
+
+function showTyping(containerId, emoji) {
+  const el = document.getElementById(containerId);
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `<div class="msg-av">${emoji}</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  el.appendChild(div); el.scrollTop = el.scrollHeight;
+  return div;
+}
+
+function copyContext() { navigator.clipboard.writeText(getContext()).then(()=>showToast('copied context!')); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
+function sendQuick(text) { document.getElementById('chatInput').value=text; sendMessage(); }
+function sendStockQuick(text) { document.getElementById('stockInput').value=text; sendStockMessage(); }
+function quickAddStockItem() { const i=document.getElementById('quickAddStock'); if(!i.value.trim())return; sendStockQuick('เพิ่มสต็อก: '+i.value.trim()); i.value=''; }
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
+function handleStockKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendStockMessage();} }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+</script>
+</body>
+</html>
