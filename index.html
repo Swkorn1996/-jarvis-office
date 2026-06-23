@@ -3,301 +3,345 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jarvis Office</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Jarvis Virtual Office</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a1a;font-family:'IBM Plex Sans Thai',sans-serif;color:#e0e0ff;overflow:hidden;height:100vh;display:flex;flex-direction:column}
 
-:root {
-  --bg: #0F0F0F;
-  --surface: #1A1A1A;
-  --surface2: #222222;
-  --border: #2A2A2A;
-  --border2: #333333;
-  --text: #E8E6E0;
-  --text2: #888780;
-  --text3: #555350;
-  --accent: #7B6EF6;
-  --accent-dim: #2D2860;
-  --green: #4ADE80;
-  --green-dim: #14532D;
-  --amber: #FBB040;
-  --amber-dim: #451A03;
-  --red: #F87171;
-  --red-dim: #3B0A0A;
-  --font: 'IBM Plex Sans Thai', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
-}
+/* TOP BAR */
+.topbar{background:#0d0d2b;border-bottom:2px solid #7B6EF6;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{font-family:'Press Start 2P',monospace;font-size:10px;color:#7B6EF6;letter-spacing:2px}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.time-display{font-family:'Press Start 2P',monospace;font-size:9px;color:#4ADE80}
+.online-badge{display:flex;align-items:center;gap:6px;font-size:11px;color:#4ADE80}
+.pulse{width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 8px #4ADE80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-body { font-family: var(--font); background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+/* MAIN */
+.main{flex:1;display:flex;overflow:hidden}
 
-/* TOP NAV */
-.topnav { display: flex; align-items: center; gap: 0; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; height: 48px; flex-shrink: 0; }
-.logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; margin-right: 24px; }
-.nav-tabs { display: flex; gap: 0; flex: 1; }
-.nav-tab { padding: 0 16px; height: 48px; display: flex; align-items: center; font-size: 13px; font-weight: 400; color: var(--text2); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
-.nav-tab:hover { color: var(--text); }
-.nav-tab.active { color: var(--text); border-bottom-color: var(--accent); }
-.nav-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
-.status-label { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+/* OFFICE CONTAINER */
+.office-container{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.office-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,#0f0f2e 0%,#050510 100%)}
+.stars{position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20px 30px,#ffffff22,transparent),radial-gradient(1px 1px at 80px 60px,#ffffff15,transparent),radial-gradient(1px 1px at 140px 20px,#ffffff18,transparent),radial-gradient(1px 1px at 200px 80px,#ffffff12,transparent),radial-gradient(1px 1px at 260px 40px,#ffffff20,transparent)}
 
-/* MAIN LAYOUT */
-.main { display: flex; flex: 1; overflow: hidden; }
+/* ISOMETRIC OFFICE */
+.office-wrap{position:relative;width:800px;height:560px}
 
-/* SIDEBAR */
-.sidebar { width: 220px; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
-.sidebar-section { padding: 12px 8px 4px; }
-.sidebar-label { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; padding: 0 8px 6px; font-family: var(--mono); }
-.agent-btn { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; border: none; background: none; cursor: pointer; text-align: left; transition: background 0.1s; }
-.agent-btn:hover { background: var(--surface2); }
-.agent-btn.active { background: var(--accent-dim); }
-.agent-emoji { width: 26px; height: 26px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.agent-info { flex: 1; min-width: 0; }
-.agent-name { font-size: 13px; font-weight: 500; color: var(--text); }
-.agent-role { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.agent-status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.dot-idle { background: var(--text3); }
-.dot-working { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
-.dot-done { background: var(--green); }
+/* ROOMS */
+.room{position:absolute;cursor:pointer;transition:all 0.2s}
+.room:hover .room-inner{filter:brightness(1.3);transform:translateY(-3px)}
+.room:hover .room-glow{opacity:1}
+.room-inner{transition:all 0.2s;position:relative}
+.room-glow{position:absolute;inset:-4px;border-radius:16px;opacity:0.4;transition:opacity 0.2s;pointer-events:none}
 
-.sidebar-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+/* ROOM SHAPES - isometric style using CSS */
+.room-floor{position:absolute;border-radius:12px}
+.room-label{position:absolute;font-size:10px;font-weight:600;letter-spacing:0.05em;text-align:center;width:100%}
+.room-agent{position:absolute;font-size:20px;text-align:center}
+.room-status{position:absolute;display:flex;align-items:center;gap:4px;font-size:9px;border-radius:20px;padding:2px 8px;font-family:'IBM Plex Sans Thai',sans-serif}
 
-/* CONTENT AREA */
-.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* CENTER - JARVIS */
+.room-jarvis{left:50%;top:50%;transform:translate(-50%,-50%)}
+.room-jarvis .room-floor{width:180px;height:140px;background:linear-gradient(135deg,#2D2860 0%,#1a1650 100%);border:2px solid #7B6EF6;box-shadow:0 0 30px #7B6EF644,inset 0 0 20px #7B6EF622}
+.room-jarvis .room-glow{background:radial-gradient(#7B6EF633,transparent);box-shadow:0 0 40px #7B6EF655}
 
-/* PAGE VIEWS */
-.page { display: none; flex: 1; overflow: hidden; flex-direction: column; }
-.page.active { display: flex; }
+/* TOP CENTER - Rex */
+.room-rex{left:50%;top:20px;transform:translateX(-50%)}
+.room-rex .room-floor{width:160px;height:110px;background:linear-gradient(135deg,#1a2510 0%,#0f1a08 100%);border:2px solid #4ADE80;box-shadow:0 0 20px #4ADE8033}
+.room-rex .room-glow{background:radial-gradient(#4ADE8022,transparent);box-shadow:0 0 30px #4ADE8044}
 
-/* JARVIS CHAT */
-.chat-wrap { display: flex; flex-direction: column; height: 100%; }
-.chat-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.chat-title { display: flex; align-items: center; gap: 10px; }
-.chat-title h2 { font-size: 15px; font-weight: 500; }
-.chat-title p { font-size: 12px; color: var(--text2); }
-.copy-ctx { font-size: 11px; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border2); background: none; color: var(--text2); cursor: pointer; font-family: var(--mono); transition: all 0.1s; }
-.copy-ctx:hover { border-color: var(--accent); color: var(--accent); }
+/* TOP RIGHT - Mia */
+.room-mia{right:30px;top:40px}
+.room-mia .room-floor{width:150px;height:120px;background:linear-gradient(135deg,#1a1530 0%,#0f0d20 100%);border:2px solid #A78BFA;box-shadow:0 0 20px #A78BFA33}
+.room-mia .room-glow{background:radial-gradient(#A78BFA22,transparent);box-shadow:0 0 30px #A78BFA44}
 
-.chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-.chat-messages::-webkit-scrollbar { width: 4px; }
-.chat-messages::-webkit-scrollbar-track { background: transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+/* TOP LEFT - Iris */
+.room-iris{left:30px;top:40px}
+.room-iris .room-floor{width:150px;height:120px;background:linear-gradient(135deg,#1a1020 0%,#0f0a18 100%);border:2px solid #F472B6;box-shadow:0 0 20px #F472B633}
+.room-iris .room-glow{background:radial-gradient(#F472B622,transparent);box-shadow:0 0 30px #F472B644}
 
-.msg { display: flex; gap: 10px; max-width: 80%; }
-.msg.user { align-self: flex-end; flex-direction: row-reverse; }
-.msg-av { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; background: var(--surface2); }
-.msg.user .msg-av { background: var(--accent-dim); }
-.bubble { padding: 10px 14px; border-radius: 10px; font-size: 14px; line-height: 1.65; }
-.msg.ai .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 10px 10px 10px; }
-.msg.user .bubble { background: var(--accent-dim); border: 1px solid var(--accent); color: var(--text); border-radius: 10px 4px 10px 10px; }
+/* BOTTOM LEFT - Axel */
+.room-axel{left:30px;bottom:40px}
+.room-axel .room-floor{width:150px;height:120px;background:linear-gradient(135deg,#0d1a2a 0%,#080f1a 100%);border:2px solid #38BDF8;box-shadow:0 0 20px #38BDF833}
+.room-axel .room-glow{background:radial-gradient(#38BDF822,transparent);box-shadow:0 0 30px #38BDF844}
 
-.typing { display: flex; align-items: center; gap: 4px; padding: 12px 14px; }
-.typing span { width: 5px; height: 5px; background: var(--text3); border-radius: 50%; animation: bounce 1.2s infinite; }
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+/* BOTTOM RIGHT - Leo */
+.room-leo{right:30px;bottom:40px}
+.room-leo .room-floor{width:150px;height:120px;background:linear-gradient(135deg,#1a1500 0%,#100d00 100%);border:2px solid #FBB040;box-shadow:0 0 20px #FBB04033}
+.room-leo .room-glow{background:radial-gradient(#FBB04022,transparent);box-shadow:0 0 30px #FBB04044}
 
-.quick-btns { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 20px 10px; flex-shrink: 0; }
-.qbtn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border2); background: none; color: var(--text2); cursor: pointer; transition: all 0.1s; font-family: var(--font); }
-.qbtn:hover { border-color: var(--accent); color: var(--accent); }
+/* BOTTOM CENTER - Quinn */
+.room-quinn{left:50%;bottom:20px;transform:translateX(-50%)}
+.room-quinn .room-floor{width:160px;height:110px;background:linear-gradient(135deg,#1a1010 0%,#100808 100%);border:2px solid #F87171;box-shadow:0 0 20px #F8717133}
+.room-quinn .room-glow{background:radial-gradient(#F8717122,transparent);box-shadow:0 0 30px #F8717144}
 
-.input-row { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--border); flex-shrink: 0; }
-textarea.chat-input { flex: 1; padding: 10px 14px; border: 1px solid var(--border2); border-radius: 8px; font-size: 14px; font-family: var(--font); resize: none; outline: none; background: var(--surface); color: var(--text); max-height: 100px; line-height: 1.5; }
-textarea.chat-input:focus { border-color: var(--accent); }
-textarea.chat-input::placeholder { color: var(--text3); }
-.send-btn { width: 38px; height: 38px; border-radius: 8px; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.1s; }
-.send-btn:hover { background: #6B5EE6; }
-.send-btn:disabled { background: var(--border2); cursor: not-allowed; }
-.send-btn svg { width: 16px; height: 16px; fill: #fff; }
+/* CONNECTING LINES */
+.connector{position:absolute;pointer-events:none}
 
-/* STOCK PAGE */
-.stock-page { display: flex; height: 100%; }
-.stock-sidebar { width: 260px; border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-.stock-header { padding: 16px; border-bottom: 1px solid var(--border); }
-.stock-header h2 { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
-.stock-header p { font-size: 11px; color: var(--text2); }
-.stock-list { flex: 1; overflow-y: auto; padding: 8px; }
-.stock-section-label { font-size: 10px; font-weight: 500; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 4px; font-family: var(--mono); }
-.stock-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; margin-bottom: 2px; }
-.stock-item:hover { background: var(--surface2); }
-.stock-name { font-size: 13px; color: var(--text); }
-.qty { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-family: var(--mono); }
-.qty.low { background: var(--red-dim); color: var(--red); }
-.qty.medium { background: var(--amber-dim); color: var(--amber); }
-.qty.good { background: var(--green-dim); color: var(--green); }
-.stock-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 30px 16px; line-height: 1.8; }
-.quick-add-stock { padding: 10px; border-top: 1px solid var(--border); }
-.quick-add-stock input { width: 100%; padding: 8px 10px; border: 1px solid var(--border2); border-radius: 6px; font-size: 13px; background: var(--surface2); color: var(--text); outline: none; font-family: var(--font); }
-.quick-add-stock input:focus { border-color: var(--accent); }
-.quick-add-stock input::placeholder { color: var(--text3); }
+/* ROOM CONTENT */
+.rc{padding:10px;position:relative;z-index:1;height:100%}
+.rc-emoji{font-size:28px;text-align:center;display:block;margin-bottom:4px;filter:drop-shadow(0 0 8px currentColor)}
+.rc-name{font-size:11px;font-weight:600;text-align:center;margin-bottom:2px}
+.rc-role{font-size:9px;text-align:center;opacity:0.6;margin-bottom:6px}
+.rc-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;border-radius:20px;padding:2px 8px;margin:0 auto;display:flex;width:fit-content}
+.rc-task{font-size:9px;text-align:center;opacity:0.5;margin-top:4px;line-height:1.4}
 
-/* LOG PAGE */
-.log-page { padding: 20px; overflow-y: auto; flex: 1; }
-.log-page h2 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
-.log-day { margin-bottom: 20px; }
-.log-date-label { font-size: 11px; font-weight: 500; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--mono); padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
-.log-entry { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; }
-.log-agent { font-size: 11px; color: var(--accent); font-family: var(--mono); margin-bottom: 3px; }
-.log-task { font-size: 13px; color: var(--text); line-height: 1.5; }
-.log-result { font-size: 12px; color: var(--green); margin-top: 4px; }
-.log-time { font-size: 11px; color: var(--text3); margin-top: 4px; font-family: var(--mono); }
-.log-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 40px; line-height: 1.8; }
+/* STATUS COLORS */
+.s-idle{background:#1a1a2a;color:#888;border:1px solid #333}
+.s-working{background:#1a2a10;color:#4ADE80;border:1px solid #4ADE80}
+.s-done{background:#1a1a3a;color:#7B6EF6;border:1px solid #7B6EF6}
 
-/* TOAST */
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 10px 16px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-family: var(--mono); }
-.toast.show { opacity: 1; }
+/* ANIMATED CHARACTERS */
+.char{position:absolute;font-size:16px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.char:nth-child(2){animation-delay:0.5s}
+.char:nth-child(3){animation-delay:1s}
+
+/* GRID FLOOR */
+.grid-floor{position:absolute;inset:0;background-image:linear-gradient(rgba(123,110,246,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(123,110,246,0.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+
+/* SIDE PANEL */
+.side-panel{width:280px;background:#0d0d20;border-left:2px solid #1a1a40;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:14px 16px;border-bottom:1px solid #1a1a40}
+.panel-header h3{font-size:12px;font-weight:600;color:#7B6EF6;font-family:'Press Start 2P',monospace}
+.panel-tabs{display:flex;border-bottom:1px solid #1a1a40}
+.ptab{flex:1;padding:8px 4px;font-size:10px;border:none;background:none;color:#555;cursor:pointer;border-bottom:2px solid transparent;font-family:'IBM Plex Sans Thai',sans-serif}
+.ptab.active{color:#7B6EF6;border-bottom-color:#7B6EF6}
+.panel-content{flex:1;overflow-y:auto;padding:12px}
+.panel-content::-webkit-scrollbar{width:3px}
+.panel-content::-webkit-scrollbar-thumb{background:#7B6EF633;border-radius:2px}
+
+/* AGENT CARDS */
+.agent-card{background:#13132a;border:1px solid #1a1a40;border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.agent-card:hover{border-color:#7B6EF6;background:#1a1a35}
+.agent-card.selected{border-color:#7B6EF6;background:#1e1e40}
+.ac-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ac-emoji{font-size:18px}
+.ac-info{flex:1}
+.ac-name{font-size:12px;font-weight:600}
+.ac-role{font-size:10px;color:#555}
+.ac-dot{width:7px;height:7px;border-radius:50%}
+.dot-idle{background:#444}
+.dot-working{background:#4ADE80;box-shadow:0 0 6px #4ADE80}
+.dot-done{background:#7B6EF6;box-shadow:0 0 6px #7B6EF6}
+.ac-task{font-size:10px;color:#666;line-height:1.5}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:100%}
+.chat-msgs{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:#7B6EF633;border-radius:2px}
+.cmsg{display:flex;gap:6px;max-width:95%}
+.cmsg.user{align-self:flex-end;flex-direction:row-reverse}
+.cmsg-av{width:22px;height:22px;border-radius:4px;background:#1a1a35;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.cmsg.user .cmsg-av{background:#2D2860}
+.cbubble{padding:7px 10px;border-radius:8px;font-size:11px;line-height:1.6}
+.cmsg.ai .cbubble{background:#13132a;border:1px solid #1a1a40;border-radius:3px 8px 8px 8px}
+.cmsg.user .cbubble{background:#2D2860;border:1px solid #7B6EF6;border-radius:8px 3px 8px 8px}
+.ctyping{display:flex;gap:3px;padding:8px}
+.ctyping span{width:5px;height:5px;background:#444;border-radius:50%;animation:bounce 1.2s infinite}
+.ctyping span:nth-child(2){animation-delay:0.2s}
+.ctyping span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.chat-input-area{padding:8px;border-top:1px solid #1a1a40}
+.chat-input-row{display:flex;gap:6px}
+.chat-in{flex:1;padding:7px 10px;border:1px solid #1a1a40;border-radius:8px;font-size:11px;background:#0a0a1a;color:#e0e0ff;outline:none;font-family:inherit}
+.chat-in:focus{border-color:#7B6EF6}
+.chat-in::placeholder{color:#333}
+.csend{width:32px;height:32px;border-radius:7px;background:#7B6EF6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.csend:hover{background:#6B5EE6}
+.csend:disabled{background:#333;cursor:not-allowed}
+.csend svg{width:13px;height:13px;fill:#fff}
+
+/* MODAL */
+.modal{position:fixed;inset:0;background:#000000aa;display:none;align-items:center;justify-content:center;z-index:100}
+.modal.open{display:flex}
+.modal-box{background:#0d0d20;border:2px solid #7B6EF6;border-radius:16px;width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{padding:16px 20px;border-bottom:1px solid #1a1a40;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:14px;font-weight:600}
+.modal-close{background:none;border:none;color:#555;font-size:18px;cursor:pointer;padding:0 4px}
+.modal-close:hover{color:#fff}
+.modal-body{flex:1;overflow-y:auto;padding:16px}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#13132a;border:1px solid #7B6EF6;color:#e0e0ff;padding:10px 16px;border-radius:8px;font-size:12px;opacity:0;transition:opacity 0.2s;pointer-events:none;font-family:'Press Start 2P',monospace;font-size:9px}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
 
-<div class="topnav">
-  <div class="logo">JARVIS // OFFICE</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('jarvis', this)">⚡ Jarvis</button>
-    <button class="nav-tab" onclick="switchPage('stock', this)">🧊 สต็อก</button>
-    <button class="nav-tab" onclick="switchPage('log', this)">📋 Work Log</button>
-  </div>
-  <div class="nav-right">
-    <div class="status-dot"></div>
-    <div class="status-label">ONLINE</div>
+<div class="topbar">
+  <div class="logo">⚡ JARVIS // VIRTUAL OFFICE</div>
+  <div class="topbar-right">
+    <div class="time-display" id="clock">00:00:00</div>
+    <div class="online-badge"><div class="pulse"></div>ONLINE</div>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- SIDEBAR: TEAM -->
-  <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">ทีม AI</div>
-      <button class="agent-btn active" onclick="selectAgent('jarvis', this)">
-        <div class="agent-emoji">🤖</div>
-        <div class="agent-info"><div class="agent-name">Jarvis</div><div class="agent-role">Chief of Staff</div></div>
-        <div class="agent-status-dot dot-done" id="dot-jarvis"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('rex', this)">
-        <div class="agent-emoji">🔍</div>
-        <div class="agent-info"><div class="agent-name">Rex</div><div class="agent-role">Research</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-rex"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('mia', this)">
-        <div class="agent-emoji">✍️</div>
-        <div class="agent-info"><div class="agent-name">Mia</div><div class="agent-role">Content</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-mia"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('axel', this)">
-        <div class="agent-emoji">📊</div>
-        <div class="agent-info"><div class="agent-name">Axel</div><div class="agent-role">Ads & Analytics</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-axel"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('iris', this)">
-        <div class="agent-emoji">👥</div>
-        <div class="agent-info"><div class="agent-name">Iris</div><div class="agent-role">HR</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-iris"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('leo', this)">
-        <div class="agent-emoji">💰</div>
-        <div class="agent-info"><div class="agent-name">Leo</div><div class="agent-role">Finance</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-leo"></div>
-      </button>
-      <button class="agent-btn" onclick="selectAgent('quinn', this)">
-        <div class="agent-emoji">✅</div>
-        <div class="agent-info"><div class="agent-name">Quinn</div><div class="agent-role">QA</div></div>
-        <div class="agent-status-dot dot-idle" id="dot-quinn"></div>
-      </button>
+  <!-- OFFICE MAP -->
+  <div class="office-container">
+    <div class="office-bg"></div>
+    <div class="stars"></div>
+    <div class="grid-floor"></div>
+
+    <div class="office-wrap">
+
+      <!-- SVG CONNECTORS -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 800 560">
+        <!-- Lines from Jarvis to each agent -->
+        <line x1="400" y1="280" x2="400" y2="130" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="280" x2="650" y2="150" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="280" x2="150" y2="150" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="280" x2="150" y2="420" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="280" x2="650" y2="420" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="400" y1="280" x2="400" y2="430" stroke="#7B6EF644" stroke-width="1.5" stroke-dasharray="4 4"/>
+      </svg>
+
+      <!-- JARVIS CENTER -->
+      <div class="room room-jarvis" onclick="openAgent('jarvis')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#A78BFA">
+            <span class="rc-emoji">🤖</span>
+            <div class="rc-name" style="color:#fff;font-size:13px">JARVIS</div>
+            <div class="rc-role">Chief of Staff</div>
+            <div class="rc-status s-done" id="status-jarvis">● พร้อมทำงาน</div>
+          </div>
+          <div class="char" style="bottom:8px;left:20px;animation-delay:0s">👾</div>
+          <div class="char" style="bottom:8px;right:20px;animation-delay:0.7s">💻</div>
+        </div>
+      </div>
+
+      <!-- REX TOP -->
+      <div class="room room-rex" onclick="openAgent('rex')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#4ADE80">
+            <span class="rc-emoji">🔍</span>
+            <div class="rc-name">REX</div>
+            <div class="rc-role">Research</div>
+            <div class="rc-status s-idle" id="status-rex">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIA TOP RIGHT -->
+      <div class="room room-mia" onclick="openAgent('mia')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#A78BFA">
+            <span class="rc-emoji">✍️</span>
+            <div class="rc-name">MIA</div>
+            <div class="rc-role">Content</div>
+            <div class="rc-status s-idle" id="status-mia">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IRIS TOP LEFT -->
+      <div class="room room-iris" onclick="openAgent('iris')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#F472B6">
+            <span class="rc-emoji">👥</span>
+            <div class="rc-name">IRIS</div>
+            <div class="rc-role">HR</div>
+            <div class="rc-status s-idle" id="status-iris">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AXEL BOTTOM LEFT -->
+      <div class="room room-axel" onclick="openAgent('axel')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#38BDF8">
+            <span class="rc-emoji">📊</span>
+            <div class="rc-name">AXEL</div>
+            <div class="rc-role">Ads & Analytics</div>
+            <div class="rc-status s-idle" id="status-axel">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEO BOTTOM RIGHT -->
+      <div class="room room-leo" onclick="openAgent('leo')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#FBB040">
+            <span class="rc-emoji">💰</span>
+            <div class="rc-name">LEO</div>
+            <div class="rc-role">Finance</div>
+            <div class="rc-status s-idle" id="status-leo">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUINN BOTTOM CENTER -->
+      <div class="room room-quinn" onclick="openAgent('quinn')">
+        <div class="room-glow"></div>
+        <div class="room-floor">
+          <div class="rc" style="color:#F87171">
+            <span class="rc-emoji">✅</span>
+            <div class="rc-name">QUINN</div>
+            <div class="rc-role">QA</div>
+            <div class="rc-status s-idle" id="status-quinn">○ ว่าง</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="panel-header">
+      <h3>COMMAND</h3>
+    </div>
+    <div class="panel-tabs">
+      <button class="ptab active" onclick="switchPanel('chat',this)">💬 แชท</button>
+      <button class="ptab" onclick="switchPanel('team',this)">👥 ทีม</button>
+      <button class="ptab" onclick="switchPanel('log',this)">📋 Log</button>
+    </div>
 
-    <!-- JARVIS PAGE -->
-    <div class="page active" id="page-jarvis">
-      <div class="chat-wrap">
-        <div class="chat-header">
-          <div class="chat-title">
-            <div>
-              <h2 id="chat-agent-name">Jarvis — Chief of Staff</h2>
-              <p id="chat-agent-desc">สั่งงานได้เลย Jarvis จะแจกงานให้ทีมและติดตามผล</p>
-            </div>
-          </div>
-          <button class="copy-ctx" onclick="copyContext()">[ copy context ]</button>
+    <!-- CHAT TAB -->
+    <div id="panel-chat" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:8px 12px;border-bottom:1px solid #1a1a40;font-size:10px;color:#555" id="chat-agent-label">🤖 Jarvis — Chief of Staff</div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="cmsg ai">
+          <div class="cmsg-av">🤖</div>
+          <div class="cbubble">สวัสดีครับ! กดที่ห้องใดก็ได้เพื่อคุยกับ Agent แต่ละคน หรือพิมพ์มาได้เลยครับ</div>
         </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="msg ai">
-            <div class="msg-av">🤖</div>
-            <div class="bubble">สวัสดีครับ! ผม Jarvis พร้อมทำงานแล้ว 👋<br><br>ทีมของเรามี Rex, Mia, Axel, Iris, Leo และ Quinn<br>4 ช่องทางรายได้: Shopee Link, TikTok อาหาร, Shopee VDO, TikTok สุขภาพ<br><br>สั่งงานได้เลยครับ</div>
-          </div>
+      </div>
+      <div class="chat-input-area">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">
+          <button onclick="sendQ('สรุปงานค้างทั้งหมด')" style="font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid #1a1a40;background:none;color:#555;cursor:pointer">งานค้าง</button>
+          <button onclick="sendQ('Rex หาสินค้า affiliate เทรนด์ TikTok')" style="font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid #1a1a40;background:none;color:#555;cursor:pointer">Rex หาสินค้า</button>
+          <button onclick="sendQ('Mia เขียนสคริปต์ value content ช่องอาหาร')" style="font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid #1a1a40;background:none;color:#555;cursor:pointer">Mia สคริปต์</button>
         </div>
-        <div class="quick-btns">
-          <button class="qbtn" onclick="sendQuick('สรุปงานค้างทั้งหมดให้หน่อย')">งานค้าง</button>
-          <button class="qbtn" onclick="sendQuick('Rex หาสินค้า affiliate ที่กำลังเทรนด์ TikTok ตอนนี้')">Rex หาสินค้า</button>
-          <button class="qbtn" onclick="sendQuick('Mia เขียนสคริปต์ value content ช่องอาหาร')">Mia สคริปต์</button>
-          <button class="qbtn" onclick="sendQuick('Axel สรุปผลสัปดาห์นี้ทุกช่องทาง')">Axel สรุปผล</button>
-          <button class="qbtn" onclick="sendQuick('Quinn ตรวจงานที่รอ approve อยู่')">Quinn ตรวจ</button>
-        </div>
-        <div class="input-row">
-          <textarea class="chat-input" id="chatInput" placeholder="สั่งงาน Jarvis ได้เลย..." rows="1"
-            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-          <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <div class="chat-input-row">
+          <input class="chat-in" id="chatIn" placeholder="สั่งงานได้เลย..." onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="csend" id="csendBtn" onclick="sendMsg()">
             <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- STOCK PAGE -->
-    <div class="page" id="page-stock">
-      <div class="stock-page">
-        <div class="stock-sidebar">
-          <div class="stock-header">
-            <h2>🧊 สต็อกตู้เย็น</h2>
-            <p>อัพเดทอัตโนมัติจากการคุย</p>
-          </div>
-          <div class="stock-list" id="stockList">
-            <div class="stock-empty">ยังไม่มีสต็อก<br>บอก Mia ว่ามีอะไรในตู้เย็น</div>
-          </div>
-          <div class="quick-add-stock">
-            <input type="text" id="quickAddStock" placeholder="เพิ่มเร็ว เช่น ไข่ 6 ฟอง" onkeydown="if(event.key==='Enter')quickAddStockItem()">
-          </div>
-        </div>
-        <div class="chat-wrap" style="flex:1">
-          <div class="chat-header">
-            <div class="chat-title">
-              <div><h2>Mia — ผู้ช่วยครัว</h2><p>บอกได้เลยว่ามีอะไร ทำอะไรไป หรืออยากทำเมนูอะไร</p></div>
-            </div>
-          </div>
-          <div class="chat-messages" id="stockMessages">
-            <div class="msg ai">
-              <div class="msg-av">✍️</div>
-              <div class="bubble">สวัสดีครับ! ผม Mia ผู้ช่วยครัว 🙌<br><br>บอกผมได้เลยว่า<br>• ตู้เย็นมีอะไรบ้าง<br>• วันนี้ทำเมนูอะไร ใช้อะไรไปบ้าง<br>• อยากทำเมนูอะไร ต้องซื้อเพิ่มอะไร</div>
-            </div>
-          </div>
-          <div class="quick-btns">
-            <button class="qbtn" onclick="sendStockQuick('วันนี้ทำอะไรดี จากของที่มีในตู้เย็น?')">วันนี้ทำอะไรดี?</button>
-            <button class="qbtn" onclick="sendStockQuick('ต้องซื้ออะไรเพิ่มบ้าง?')">ต้องซื้ออะไร?</button>
-            <button class="qbtn" onclick="sendStockQuick('แนะนำเมนูสำหรับคลิป TikTok จากของที่มี')">เมนูสำหรับคลิป</button>
-          </div>
-          <div class="input-row">
-            <textarea class="chat-input" id="stockInput" placeholder="บอก Mia ได้เลย..." rows="1"
-              onkeydown="handleStockKey(event)" oninput="autoResize(this)"></textarea>
-            <button class="send-btn" id="stockSendBtn" onclick="sendStockMessage()">
-              <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
+    <!-- TEAM TAB -->
+    <div id="panel-team" style="flex:1;overflow-y:auto;padding:10px;display:none">
+      <div id="teamCards"></div>
     </div>
 
-    <!-- LOG PAGE -->
-    <div class="page" id="page-log">
-      <div class="log-page">
-        <h2>📋 Work Log</h2>
-        <div id="logList"><div class="log-empty">ยังไม่มี work log<br>เริ่มสั่งงาน Jarvis ได้เลย</div></div>
-      </div>
+    <!-- LOG TAB -->
+    <div id="panel-log" style="flex:1;overflow-y:auto;padding:10px;display:none">
+      <div id="logCards"><div style="font-size:11px;color:#333;text-align:center;padding:20px">ยังไม่มี log</div></div>
     </div>
-
   </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -306,228 +350,152 @@ textarea.chat-input::placeholder { color: var(--text3); }
 function load(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 
-let stock = load('jo_stock', {});
-let workLog = load('jo_worklog', []);
-let agentStatus = load('jo_agent_status', {
-  jarvis:{status:'done',task:''}, rex:{status:'idle',task:''}, mia:{status:'idle',task:''},
-  axel:{status:'idle',task:''}, iris:{status:'idle',task:''}, leo:{status:'idle',task:''}, quinn:{status:'idle',task:''}
-});
+let workLog = load('vo_log',[]);
+let agentStatus = load('vo_status',{jarvis:{s:'done',task:''},rex:{s:'idle',task:''},mia:{s:'idle',task:''},axel:{s:'idle',task:''},iris:{s:'idle',task:''},leo:{s:'idle',task:''},quinn:{s:'idle',task:''}});
 let chatHistory = [];
-let stockHistory = [];
 let currentAgent = 'jarvis';
 
 const AGENTS = {
-  jarvis:{name:'Jarvis — Chief of Staff', desc:'สั่งงานได้เลย Jarvis จะแจกงานให้ทีมและติดตามผล', emoji:'🤖'},
-  rex:{name:'Rex — Research Agent', desc:'หาสินค้า เทรนด์ วิเคราะห์คู่แข่ง', emoji:'🔍'},
-  mia:{name:'Mia — Content Agent', desc:'เขียนสคริปต์ แคปชั่น ไอเดียคลิป', emoji:'✍️'},
-  axel:{name:'Axel — Ads & Analytics', desc:'ยิงแอด ติดตามผล optimize', emoji:'📊'},
-  iris:{name:'Iris — HR Agent', desc:'ติดตามพนักงาน เอกสาร KPI', emoji:'👥'},
-  leo:{name:'Leo — Finance Agent', desc:'บัญชี รายรับ-รายจ่าย คอมมิชชั่น', emoji:'💰'},
-  quinn:{name:'Quinn — QA Agent', desc:'ตรวจสอบงานก่อน publish', emoji:'✅'},
+  jarvis:{name:'Jarvis',fullname:'Jarvis — Chief of Staff',emoji:'🤖',color:'#7B6EF6',prompt:`คุณคือ Jarvis หัวหน้าทีม AI สำหรับธุรกิจ Affiliate Marketing ทีม: Rex(Research), Mia(Content), Axel(Ads), Iris(HR), Leo(Finance), Quinn(QA) 4 ช่องทาง: Shopee Link FB, TikTok อาหาร, Shopee VDO, TikTok สุขภาพ ตอบกระชับ ภาษาไทย เมื่อมอบหมายงานแนบ: \`\`\`json{"log":{"agent":"ชื่อ","task":"งาน"},"status":{"id":"rex|mia|axel|iris|leo|quinn","s":"idle|working|done","task":"งาน"}}\`\`\``},
+  rex:{name:'Rex',fullname:'Rex — Research',emoji:'🔍',color:'#4ADE80',prompt:'คุณคือ Rex Research Agent หาสินค้า affiliate เทรนด์ TikTok/Shopee วิเคราะห์คู่แข่ง ตอบภาษาไทย'},
+  mia:{name:'Mia',fullname:'Mia — Content',emoji:'✍️',color:'#A78BFA',prompt:'คุณคือ Mia Content Agent เขียนสคริปต์ TikTok แคปชั่น ช่องอาหารและสุขภาพ ตอบภาษาไทย'},
+  axel:{name:'Axel',fullname:'Axel — Ads & Analytics',emoji:'📊',color:'#38BDF8',prompt:'คุณคือ Axel Ads Analytics Agent วิเคราะห์ผลแอด ROAS CTR optimize ตอบภาษาไทย'},
+  iris:{name:'Iris',fullname:'Iris — HR',emoji:'👥',color:'#F472B6',prompt:'คุณคือ Iris HR Agent ติดตามพนักงาน KPI เอกสาร ตอบภาษาไทย'},
+  leo:{name:'Leo',fullname:'Leo — Finance',emoji:'💰',color:'#FBB040',prompt:'คุณคือ Leo Finance Agent สรุปรายรับ-รายจ่าย คอมมิชชั่น ตอบภาษาไทย'},
+  quinn:{name:'Quinn',fullname:'Quinn — QA',emoji:'✅',color:'#F87171',prompt:'คุณคือ Quinn QA Agent ตรวจสอบงานก่อน publish ความถูกต้อง ตอบภาษาไทย'},
 };
 
-const AGENT_PROMPTS = {
-  jarvis: `คุณคือ Jarvis หัวหน้าทีม AI สำหรับธุรกิจ Affiliate Marketing
-ทีม: Rex(Research), Mia(Content), Axel(Ads&Analytics), Iris(HR), Leo(Finance), Quinn(QA)
-4 ช่องทาง: 1.Shopee Link Facebook 2.TikTok ช่องอาหาร(sale+value content) 3.Shopee VDO 4.TikTok ช่องสุขภาพ AI
-ตอบกระชับ เป็นกันเอง ภาษาไทย
-เมื่อมอบหมายงานหรืออัพเดทสถานะ แนบ JSON:
-\`\`\`json
-{"logs":[{"agent":"ชื่อ","task":"งาน","result":"ผล"}],"status":{"id":"rex|mia|axel|iris|leo|quinn","s":"idle|working|done","task":"งานสั้น"}}
-\`\`\``,
-  rex: `คุณคือ Rex Research Agent เชี่ยวชาญหาสินค้า affiliate เทรนด์ TikTok/Shopee วิเคราะห์คู่แข่ง คอมมิชชั่น ตอบเป็นภาษาไทย กระชับ`,
-  mia: `คุณคือ Mia Content Agent เขียนสคริปต์ TikTok แคปชั่น Facebook ไอเดียคลิป ช่องอาหารและสุขภาพ ตอบเป็นภาษาไทย`,
-  axel: `คุณคือ Axel Ads & Analytics Agent วิเคราะห์ผลแอด ROAS CTR แนะนำการ optimize ตอบเป็นภาษาไทย`,
-  iris: `คุณคือ Iris HR Agent ติดตามงานพนักงาน สรุป KPI จัดการเอกสาร HR ตอบเป็นภาษาไทย`,
-  leo: `คุณคือ Leo Finance Agent สรุปรายรับ-รายจ่าย ติดตามคอมมิชชั่น affiliate รายงานการเงิน ตอบเป็นภาษาไทย`,
-  quinn: `คุณคือ Quinn QA Agent ตรวจสอบสคริปต์ แคปชั่น ความถูกต้องก่อน publish ตอบเป็นภาษาไทย`,
-};
+// CLOCK
+function updateClock(){const n=new Date();document.getElementById('clock').textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>x.toString().padStart(2,'0')).join(':')}
+setInterval(updateClock,1000);updateClock();
 
-const MIA_STOCK_PROMPT = `คุณคือ Mia ผู้ช่วยครัวและระบบสต็อกตู้เย็น
-งาน: ติดตามสต็อกวัตถุดิบ แนะนำเมนู บอกว่าต้องซื้อเพิ่มอะไร
-รับภาษาไทยธรรมชาติ ไม่ต้องเป๊ะ
-เมื่ออัพเดทสต็อกหรือบันทึก log แนบ JSON:
-\`\`\`json
-{"stock":[{"name":"ชื่อ","qty":"จำนวน","level":"low|medium|good"}],"log":{"menu":"เมนู","used":["วัตถุดิบ"]}}
-\`\`\`
-qty="หมด" = ลบออกจากสต็อก`;
-
-renderStock(); renderLog(); updateDots();
-
-function switchPage(name, btn) {
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('page-' + name).classList.add('active');
+// RENDER TEAM
+function renderTeam(){
+  const el=document.getElementById('teamCards');
+  el.innerHTML=Object.entries(AGENTS).map(([id,a])=>{
+    const s=agentStatus[id];
+    return `<div class="agent-card ${currentAgent===id?'selected':''}" onclick="openAgent('${id}')">
+      <div class="ac-top">
+        <span class="ac-emoji">${a.emoji}</span>
+        <div class="ac-info"><div class="ac-name">${a.name}</div><div class="ac-role">${a.fullname.split('—')[1]||''}</div></div>
+        <div class="ac-dot ${s.s==='working'?'dot-working':s.s==='done'?'dot-done':'dot-idle'}"></div>
+      </div>
+      ${s.task?`<div class="ac-task">${s.task}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
-function selectAgent(id, btn) {
-  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentAgent = id;
-  const a = AGENTS[id];
-  document.getElementById('chat-agent-name').textContent = a.name;
-  document.getElementById('chat-agent-desc').textContent = a.desc;
-  chatHistory = [];
-  const msgs = document.getElementById('chatMessages');
-  msgs.innerHTML = `<div class="msg ai"><div class="msg-av">${a.emoji}</div><div class="bubble">สวัสดีครับ! ผม ${a.name.split(' ')[0]} พร้อมทำงานแล้ว พิมพ์มาได้เลยครับ</div></div>`;
-  switchPage('jarvis', document.querySelector('.nav-tab'));
-}
-
-function updateDots() {
-  Object.entries(agentStatus).forEach(([id, s]) => {
-    const el = document.getElementById('dot-' + id);
-    if (el) { el.className = 'agent-status-dot'; el.classList.add(s.status === 'working' ? 'dot-working' : s.status === 'done' ? 'dot-done' : 'dot-idle'); }
-  });
-}
-
-function getContext() {
-  const today = new Date().toLocaleDateString('th-TH');
-  const todayLogs = workLog.filter(l => l.date === today);
-  return `[Jarvis Context — ${today}]
-สถานะทีม: ${Object.entries(agentStatus).map(([id,s])=>`${id}:${s.status}${s.task?' ('+s.task+')':''}`).join(', ')}
-งานวันนี้: ${todayLogs.length ? todayLogs.map(l=>`${l.agent}:${l.task}`).join(' | ') : 'ยังไม่มี'}`;
-}
-
-async function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim(); if (!text) return;
-  input.value = ''; input.style.height = 'auto';
-  addMsg('chatMessages', 'user', text, AGENTS[currentAgent].emoji);
-  chatHistory.push({role:'user', content: text});
-  const btn = document.getElementById('sendBtn'); btn.disabled = true;
-  const typing = showTyping('chatMessages', AGENTS[currentAgent].emoji);
-  try {
-    const ctx = currentAgent === 'jarvis' ? getContext() + '\n\n' : '';
-    const messages = chatHistory.map((m,i) => i===0 ? {role:m.role, content: ctx+m.content} : {role:m.role, content:m.content});
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system: AGENT_PROMPTS[currentAgent], messages})
-    });
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'มีปัญหาเล็กน้อย ลองใหม่นะครับ';
-    typing.remove();
-    const clean = processJarvisResponse(reply);
-    addMsg('chatMessages', 'ai', clean, AGENTS[currentAgent].emoji);
-    chatHistory.push({role:'assistant', content:reply});
-  } catch(e) { typing.remove(); addMsg('chatMessages', 'ai', 'เชื่อมต่อไม่ได้ตอนนี้ครับ ลองใหม่', AGENTS[currentAgent].emoji); }
-  btn.disabled = false;
-}
-
-function processJarvisResponse(text) {
-  const match = text.match(/```json\n([\s\S]*?)\n```/);
-  if (match) {
-    try {
-      const d = JSON.parse(match[1]);
-      if (d.logs) d.logs.forEach(l => addLog(l.agent, l.task, l.result||''));
-      if (d.status) { const s = d.status; if (agentStatus[s.id]) { agentStatus[s.id] = {status:s.s, task:s.task||''}; save('jo_agent_status', agentStatus); updateDots(); } }
-    } catch(e) {}
-    return text.replace(/```json\n[\s\S]*?\n```/g,'').trim();
-  }
-  return text;
-}
-
-async function sendStockMessage() {
-  const input = document.getElementById('stockInput');
-  const text = input.value.trim(); if (!text) return;
-  input.value = ''; input.style.height = 'auto';
-  addMsg('stockMessages', 'user', text, '✍️');
-  stockHistory.push({role:'user', content: text});
-  const btn = document.getElementById('stockSendBtn'); btn.disabled = true;
-  const typing = showTyping('stockMessages', '✍️');
-  try {
-    const stockCtx = `[สต็อกปัจจุบัน]\n${Object.values(stock).length ? Object.values(stock).map(i=>`- ${i.name}: ${i.qty}`).join('\n') : 'ว่างเปล่า'}`;
-    const messages = stockHistory.map((m,i) => i===0 ? {role:m.role, content:stockCtx+'\n\n'+m.content} : {role:m.role, content:m.content});
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1000, system:MIA_STOCK_PROMPT, messages})
-    });
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'มีปัญหาเล็กน้อย ลองใหม่นะครับ';
-    typing.remove();
-    const clean = processStockResponse(reply);
-    addMsg('stockMessages', 'ai', clean, '✍️');
-    stockHistory.push({role:'assistant', content:reply});
-  } catch(e) { typing.remove(); addMsg('stockMessages', 'ai', 'เชื่อมต่อไม่ได้ตอนนี้ครับ ลองใหม่', '✍️'); }
-  btn.disabled = false;
-}
-
-function processStockResponse(text) {
-  const match = text.match(/```json\n([\s\S]*?)\n```/);
-  if (match) {
-    try {
-      const d = JSON.parse(match[1]);
-      if (d.stock) { d.stock.forEach(item => { if (item.qty==='หมด'||item.qty==='0') delete stock[item.name]; else stock[item.name]={name:item.name,qty:item.qty,level:item.level||'medium'}; }); save('jo_stock',stock); renderStock(); }
-      if (d.log && d.log.menu) { const now=new Date(); workLog.unshift({date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),agent:'Mia',task:`ทำเมนู: ${d.log.menu}`,result:`ใช้: ${(d.log.used||[]).join(', ')}`}); save('jo_worklog',workLog); renderLog(); }
-    } catch(e) {}
-    return text.replace(/```json\n[\s\S]*?\n```/g,'').trim();
-  }
-  return text;
-}
-
-function renderStock() {
-  const el = document.getElementById('stockList');
-  const items = Object.values(stock);
-  if (!items.length) { el.innerHTML='<div class="stock-empty">ยังไม่มีสต็อก<br>บอก Mia ว่ามีอะไรในตู้เย็น</div>'; return; }
-  const g = {low:[],medium:[],good:[]};
-  items.forEach(i => (g[i.level]||g.medium).push(i));
-  let html = '';
-  if (g.low.length) html += `<div class="stock-section-label">ใกล้หมด ⚠️</div>${g.low.map(si).join('')}`;
-  if (g.medium.length) html += `<div class="stock-section-label">พอใช้ได้</div>${g.medium.map(si).join('')}`;
-  if (g.good.length) html += `<div class="stock-section-label">เพียงพอ ✓</div>${g.good.map(si).join('')}`;
-  el.innerHTML = html;
-}
-function si(i) { return `<div class="stock-item"><span class="stock-name">${i.name}</span><span class="qty ${i.level}">${i.qty}</span></div>`; }
-
-function renderLog() {
-  const el = document.getElementById('logList');
-  if (!workLog.length) { el.innerHTML='<div class="log-empty">ยังไม่มี work log<br>เริ่มสั่งงาน Jarvis ได้เลย</div>'; return; }
-  const byDate = {};
-  workLog.forEach(l => { if (!byDate[l.date]) byDate[l.date]=[]; byDate[l.date].push(l); });
-  el.innerHTML = Object.entries(byDate).map(([date,entries]) => `
-    <div class="log-day">
-      <div class="log-date-label">${date}</div>
-      ${entries.map(e=>`<div class="log-entry">
-        <div class="log-agent">${e.agent}</div>
-        <div class="log-task">${e.task}</div>
-        ${e.result?`<div class="log-result">→ ${e.result}</div>`:''}
-        <div class="log-time">${e.time||''}</div>
+// RENDER LOG
+function renderLog(){
+  const el=document.getElementById('logCards');
+  if(!workLog.length){el.innerHTML='<div style="font-size:11px;color:#333;text-align:center;padding:20px">ยังไม่มี log</div>';return;}
+  const byDate={};
+  workLog.forEach(l=>{if(!byDate[l.date])byDate[l.date]=[];byDate[l.date].push(l);});
+  el.innerHTML=Object.entries(byDate).map(([date,items])=>`
+    <div style="margin-bottom:12px">
+      <div style="font-size:9px;color:#333;letter-spacing:0.1em;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid #1a1a40;margin-bottom:6px;font-family:'Press Start 2P',monospace">${date}</div>
+      ${items.map(i=>`<div style="background:#13132a;border:1px solid #1a1a40;border-radius:6px;padding:8px;margin-bottom:4px">
+        <div style="font-size:10px;color:#7B6EF6;margin-bottom:2px">${i.agent}</div>
+        <div style="font-size:11px;color:#aaa">${i.task}</div>
+        ${i.result?`<div style="font-size:10px;color:#4ADE80;margin-top:2px">→ ${i.result}</div>`:''}
       </div>`).join('')}
     </div>`).join('');
 }
 
-function addLog(agent, task, result='') {
-  const now = new Date();
+// UPDATE ROOM STATUS
+function updateRoomStatus(id,status,task){
+  const el=document.getElementById('status-'+id);
+  if(!el)return;
+  const labels={idle:'○ ว่าง',working:'● กำลังทำงาน',done:'✓ เสร็จแล้ว'};
+  const classes={idle:'s-idle',working:'s-working',done:'s-done'};
+  el.className='rc-status '+classes[status];
+  el.textContent=labels[status]+(task?' — '+task:'');
+}
+
+function openAgent(id){
+  currentAgent=id;
+  const a=AGENTS[id];
+  document.getElementById('chat-agent-label').textContent=a.emoji+' '+a.fullname;
+  chatHistory=[];
+  const msgs=document.getElementById('chatMsgs');
+  msgs.innerHTML=`<div class="cmsg ai"><div class="cmsg-av">${a.emoji}</div><div class="cbubble">สวัสดีครับ! ผม ${a.name} พร้อมทำงานแล้ว สั่งได้เลยครับ</div></div>`;
+  switchPanel('chat',document.querySelector('.ptab'));
+  renderTeam();
+}
+
+async function sendMsg(){
+  const input=document.getElementById('chatIn');
+  const text=input.value.trim();if(!text)return;
+  input.value='';
+  const a=AGENTS[currentAgent];
+  addCMsg('user',text,a.emoji);
+  chatHistory.push({role:'user',content:text});
+  const btn=document.getElementById('csendBtn');btn.disabled=true;
+  const typing=showTyping(a.emoji);
+  try{
+    const ctx=currentAgent==='jarvis'?`[สถานะทีม: ${Object.entries(agentStatus).map(([id,s])=>`${id}:${s.s}`).join(',')}]\n\n`:'';
+    const messages=chatHistory.map((m,i)=>i===0?{role:m.role,content:ctx+m.content}:{role:m.role,content:m.content});
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:a.prompt,messages})});
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'มีปัญหาเล็กน้อย ลองใหม่นะครับ';
+    typing.remove();
+    const clean=processReply(reply);
+    addCMsg('ai',clean,a.emoji);
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(e){typing.remove();addCMsg('ai','เชื่อมต่อไม่ได้ตอนนี้ครับ',a.emoji);}
+  btn.disabled=false;
+}
+
+function processReply(text){
+  const m=text.match(/```json({[\s\S]*?})\`\`\`|```json\n({[\s\S]*?})\n```/);
+  if(m){
+    try{
+      const d=JSON.parse(m[1]||m[2]);
+      if(d.log)addLog(d.log.agent||currentAgent,d.log.task||'',d.log.result||'');
+      if(d.status){const s=d.status;agentStatus[s.id]={s:s.s,task:s.task||''};save('vo_status',agentStatus);updateRoomStatus(s.id,s.s,s.task);renderTeam();}
+    }catch(e){}
+    return text.replace(/```json[\s\S]*?```/g,'').trim();
+  }
+  return text;
+}
+
+function addLog(agent,task,result=''){
+  const now=new Date();
   workLog.unshift({date:now.toLocaleDateString('th-TH'),time:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),agent,task,result});
-  if (workLog.length>200) workLog=workLog.slice(0,200);
-  save('jo_worklog',workLog); renderLog();
+  if(workLog.length>100)workLog=workLog.slice(0,100);
+  save('vo_log',workLog);renderLog();
 }
 
-function addMsg(containerId, role, text, emoji) {
-  const el = document.getElementById(containerId);
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  div.innerHTML = `<div class="msg-av">${role==='ai'?emoji:'👤'}</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
-  el.appendChild(div); el.scrollTop = el.scrollHeight;
+function addCMsg(role,text,emoji){
+  const el=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className='cmsg '+role;
+  div.innerHTML=`<div class="cmsg-av">${role==='ai'?emoji:'👤'}</div><div class="cbubble">${text.replace(/\n/g,'<br>')}</div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
 }
 
-function showTyping(containerId, emoji) {
-  const el = document.getElementById(containerId);
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.innerHTML = `<div class="msg-av">${emoji}</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
-  el.appendChild(div); el.scrollTop = el.scrollHeight;
+function showTyping(emoji){
+  const el=document.getElementById('chatMsgs');
+  const div=document.createElement('div');
+  div.className='cmsg ai';
+  div.innerHTML=`<div class="cmsg-av">${emoji}</div><div class="cbubble"><div class="ctyping"><span></span><span></span><span></span></div></div>`;
+  el.appendChild(div);el.scrollTop=el.scrollHeight;
   return div;
 }
 
-function copyContext() { navigator.clipboard.writeText(getContext()).then(()=>showToast('copied context!')); }
-function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); }
-function sendQuick(text) { document.getElementById('chatInput').value=text; sendMessage(); }
-function sendStockQuick(text) { document.getElementById('stockInput').value=text; sendStockMessage(); }
-function quickAddStockItem() { const i=document.getElementById('quickAddStock'); if(!i.value.trim())return; sendStockQuick('เพิ่มสต็อก: '+i.value.trim()); i.value=''; }
-function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
-function handleStockKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendStockMessage();} }
-function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function switchPanel(name,btn){
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-chat').style.display=name==='chat'?'flex':'none';
+  document.getElementById('panel-team').style.display=name==='team'?'block':'none';
+  document.getElementById('panel-log').style.display=name==='log'?'block':'none';
+}
+
+function sendQ(text){document.getElementById('chatIn').value=text;sendMsg();}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+
+renderTeam();renderLog();
 </script>
 </body>
 </html>
