@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sale Content Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:#f7f6f2;color:#2c2c2a;min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{background:#c03000;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:3px solid #8a1800}
+.logo{font-family:'IBM Plex Mono',monospace;font-size:11px;color:#f8e8a0;letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid #f8e8a080;background:none;color:#f8e8a0;cursor:pointer;font-family:inherit}
+.tb-btn:hover{background:#8a1800}
+
+.step-bar{display:flex;align-items:center;gap:0;background:#8a1800;padding:0 20px}
+.step{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:10px;color:#f8c0a0;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s}
+.step.active{color:#f8e8a0;border-bottom-color:#f8e8a0;font-weight:600}
+.step.done{color:#f8e8c0}
+.step.done .sn{background:#4ADE80;color:#fff}
+.sn{width:18px;height:18px;border-radius:50%;background:#8a1800;display:flex;align-items:center;justify-content:center;font-size:9px;color:#f8e8a0;border:1px solid #f8c0a0}
+.step.active .sn{background:#f8e8a0;color:#c03000}
+
+.main{flex:1;display:flex;overflow:hidden}
+.content{flex:1;overflow-y:auto;padding:20px;max-width:900px}
+.sidebar{width:300px;background:#fff;border-left:1px solid #e5e3dc;display:flex;flex-direction:column;overflow:hidden}
+
+.page{display:none}.page.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #e5e3dc;border-radius:12px;padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px}
+.badge-red{background:#FAECE7;color:#993C1D}
+.badge-green{background:#EAF3DE;color:#3B6D11}
+.badge-blue{background:#E6F1FB;color:#185FA5}
+.badge-purple{background:#EEEDFE;color:#534AB7}
+.badge-gray{background:#e5e3dc;color:#5F5E5A}
+.badge-orange{background:#FEF0E7;color:#c03000}
+
+.inp{width:100%;padding:9px 12px;border:1px solid #e5e3dc;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#f7f6f2;color:#2c2c2a}
+.inp:focus{border-color:#c03000;background:#fff}
+.inp::placeholder{color:#b4b2a9}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.6}
+.lbl{font-size:11px;color:#888780;margin-bottom:4px;display:block}
+
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:#c03000;color:#fff;width:100%;margin-top:10px}
+.btn-primary:hover{background:#8a1800}
+.btn-primary:disabled{background:#b4b2a9;cursor:not-allowed}
+.btn-secondary{background:#fff;color:#c03000;border:1px solid #c03000}
+.btn-secondary:hover{background:#FAECE7}
+.btn-ghost{background:#f7f6f2;color:#5F5E5A;border:1px solid #e5e3dc;font-size:11px;padding:4px 10px}
+.btn-ghost:hover{background:#e5e3dc}
+.btn-green{background:#3B6D11;color:#fff}
+.btn-green:hover{background:#2a4e0c}
+
+/* IMAGE UPLOAD */
+.img-zone{border:2px dashed #e5e3dc;border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:#f7f6f2;transition:all 0.15s}
+.img-zone:hover{border-color:#c03000;background:#FAECE7}
+.img-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.img-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;border:2px solid #e5e3dc}
+
+/* ITEM LIST */
+.item-list{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto;padding-right:4px}
+.item-list::-webkit-scrollbar{width:3px}
+.item-list::-webkit-scrollbar-thumb{background:#e5e3dc;border-radius:2px}
+.item-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid #e5e3dc;cursor:pointer;background:#fafaf8;transition:all 0.1s}
+.item-row:hover{border-color:#c03000;background:#FAECE7}
+.item-row.sel{border-color:#c03000;background:#FAECE7}
+.item-row input[type=checkbox]{width:15px;height:15px;accent-color:#c03000;flex-shrink:0;margin-top:2px}
+.item-num{font-size:10px;color:#888780;flex-shrink:0;margin-top:1px;font-family:'IBM Plex Mono',monospace;width:22px}
+.item-text{font-size:12px;line-height:1.6;flex:1}
+
+.add-custom{display:flex;gap:6px;margin-top:8px}
+.add-custom input{flex:1;padding:7px 10px;border:1px solid #e5e3dc;border-radius:8px;font-size:12px;font-family:inherit;outline:none;background:#f7f6f2}
+.add-custom input:focus{border-color:#c03000}
+.add-custom button{padding:7px 12px;border-radius:8px;border:none;background:#c03000;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+
+.sel-count{font-size:11px;color:#c03000;background:#FAECE7;padding:2px 8px;border-radius:20px}
+
+/* HOOK MATCHING */
+.intent-block{background:#fafaf8;border:1px solid #e5e3dc;border-radius:10px;padding:12px;margin-bottom:10px}
+.intent-label{font-size:12px;font-weight:500;color:#2c2c2a;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e5e3dc}
+.hook-options{display:flex;flex-direction:column;gap:6px}
+.hook-option{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;border:1px solid #e5e3dc;cursor:pointer;background:#fff;transition:all 0.1s}
+.hook-option:hover{border-color:#c03000;background:#FAECE7}
+.hook-option.sel{border-color:#c03000;background:#FAECE7}
+.hook-option input[type=checkbox]{width:15px;height:15px;accent-color:#c03000;flex-shrink:0;margin-top:2px}
+.hook-cat{font-size:9px;padding:1px 6px;border-radius:20px;background:#e5e3dc;color:#5F5E5A;flex-shrink:0;margin-top:2px;white-space:nowrap}
+.hook-cat.Q{background:#E6F1FB;color:#185FA5}
+.hook-cat.U{background:#FAECE7;color:#993C1D}
+.hook-cat.S{background:#EEEDFE;color:#534AB7}
+.hook-cat.P{background:#EAF3DE;color:#3B6D11}
+.hook-cat.M{background:#FEF0E7;color:#c03000}
+.hook-cat.N{background:#fce8e8;color:#8a1800}
+.hook-text{font-size:12px;line-height:1.5;flex:1}
+.body-preview{font-size:11px;color:#888780;margin-top:4px;padding-top:4px;border-top:1px dashed #e5e3dc;line-height:1.5}
+
+.script-count-bar{background:#EAF3DE;border:1px solid #97C459;border-radius:8px;padding:8px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.sc-num{font-size:13px;font-weight:600;color:#3B6D11}
+.sc-label{font-size:11px;color:#3B6D11}
+
+/* SCRIPT BOXES */
+.script-item{background:#fafaf8;border:1px solid #e5e3dc;border-radius:10px;padding:12px;margin-bottom:10px}
+.script-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.script-num{font-size:11px;font-weight:600;color:#c03000;font-family:'IBM Plex Mono',monospace}
+.script-textarea{width:100%;padding:8px;border:1px solid #e5e3dc;border-radius:6px;font-size:12px;font-family:inherit;resize:vertical;min-height:100px;outline:none;line-height:1.7;background:#fff}
+.script-textarea:focus{border-color:#c03000}
+
+/* HEADLINE OUTPUT */
+.headline-item{background:#fff;border:1px solid #e5e3dc;border-radius:10px;padding:12px;margin-bottom:8px}
+.hl-num{font-size:10px;color:#888780;font-family:'IBM Plex Mono',monospace;margin-bottom:6px}
+.hl-top{font-size:15px;font-weight:600;color:#2c2c2a}
+.hl-bot{font-size:14px;color:#c03000;margin-bottom:8px}
+.hl-script{font-size:11px;color:#888780;line-height:1.6;padding-top:8px;border-top:1px solid #e5e3dc}
+
+/* SIDEBAR */
+.sb-header{padding:14px 16px;border-bottom:1px solid #e5e3dc}
+.sb-header h3{font-size:13px;font-weight:600}
+.sb-body{flex:1;overflow-y:auto;padding:12px}
+.sb-body::-webkit-scrollbar{width:3px}
+.sb-body::-webkit-scrollbar-thumb{background:#e5e3dc;border-radius:2px}
+.sum-item{margin-bottom:12px}
+.sum-lbl{font-size:10px;color:#888780;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.sum-val{font-size:11px;color:#2c2c2a;line-height:1.6;background:#f7f6f2;padding:6px 8px;border-radius:6px;border:1px solid #e5e3dc}
+
+/* SSSTIK BANNER */
+.ssstik-bar{display:flex;align-items:center;gap:10px;background:#f7f6f2;border:1px solid #e5e3dc;border-radius:8px;padding:10px 12px;margin-bottom:10px}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.85);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column;gap:10px}
+.loading-overlay.show{display:flex}
+.loading-text{font-size:13px;color:#c03000;font-weight:500}
+.typing{display:flex;gap:4px}
+.typing span{width:8px;height:8px;background:#c03000;border-radius:50%;animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#2c2c2a;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:200}
+.toast.show{opacity:1}
+
+.divider{height:1px;background:#e5e3dc;margin:12px 0}
+
+.next-set-bar{background:#EEEDFE;border:1px solid #AFA9EC;border-radius:8px;padding:12px;margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.next-set-info{font-size:12px;color:#534AB7}
+
+/* HOOK CATEGORY FILTER */
+.cat-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cat-chip{font-size:11px;padding:4px 10px;border-radius:20px;border:2px solid #e5e3dc;background:#f7f6f2;color:#5F5E5A;cursor:pointer;transition:all 0.1s}
+.cat-chip.active{border-color:#c03000;background:#FAECE7;color:#c03000;font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">✍️ SALE CONTENT TOOL</div>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="saveProject()">💾 Save Project</button>
+    <input type="file" id="loadFile" accept=".json" style="display:none" onchange="loadProject(this)">
+    <button class="tb-btn" onclick="document.getElementById('loadFile').click()">📂 Load Project</button>
+  </div>
+</div>
+
+<div class="step-bar">
+  <div class="step active" id="s1" onclick="goStep(1)"><div class="sn">1</div>สินค้า</div>
+  <div class="step" id="s2" onclick="goStep(2)"><div class="sn">2</div>Intent & USP</div>
+  <div class="step" id="s3" onclick="goStep(3)"><div class="sn">3</div>Body + Hook</div>
+  <div class="step" id="s4" onclick="goStep(4)"><div class="sn">4</div>Scripts</div>
+  <div class="step" id="s5" onclick="goStep(5)"><div class="sn">5</div>Headline</div>
+</div>
+
+<div class="main">
+<div class="content">
+
+<!-- STEP 1 -->
+<div class="page active" id="page1">
+  <div class="card">
+    <div class="card-title">🛒 ข้อมูลสินค้า <span class="badge badge-red">Step 1</span></div>
+    <div style="margin-bottom:10px">
+      <span class="lbl">ชื่อสินค้า *</span>
+      <input class="inp" id="productName" placeholder="เช่น พุทรานมสดแม่ชบา, กาแฟรังนก...">
+    </div>
+    <div style="margin-bottom:10px">
+      <span class="lbl">รูปภาพสินค้า (แคปจาก Shopee/TikTok — Claude จะอ่านรายละเอียดเอง)</span>
+      <div class="img-zone" onclick="document.getElementById('imgInput').click()">
+        <div style="font-size:20px;margin-bottom:4px">📷</div>
+        <div style="font-size:12px;color:#888780">กดเพื่อเพิ่มรูป — รองรับหลายรูปพร้อมกัน</div>
+      </div>
+      <input type="file" id="imgInput" accept="image/*" multiple style="display:none" onchange="handleImages(this)">
+      <div class="img-preview" id="imgPreview"></div>
+    </div>
+    <div class="card" style="margin-bottom:10px;padding:12px">
+      <div class="card-title" style="margin-bottom:8px">🎵 ลิงค์คลิปขายดีจาก TikTok <span class="badge badge-gray">สูงสุด 6 ลิงค์</span></div>
+      <div style="font-size:11px;color:#888780;margin-bottom:8px">แปะลิงค์แล้วกด Copy → ไปสั่ง Cowork ให้โหลดลงเครื่องให้อัตโนมัติ</div>
+      <div id="linkInputs" style="display:flex;flex-direction:column;gap:6px">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 1 — https://www.tiktok.com/..." id="tl0">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 2" id="tl1">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 3" id="tl2">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 4" id="tl3">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 5" id="tl4">
+        <input class="inp" style="font-size:12px" placeholder="ลิงค์ที่ 6" id="tl5">
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-ghost" style="flex:1" onclick="copyTikTokLinks()">📋 Copy Links → ไปสั่ง Cowork</button>
+        <button class="btn btn-ghost" onclick="window.open('https://ssstik.io','_blank')">เปิด ssstik.io ↗</button>
+      </div>
+      <div id="coworkCmd" style="display:none;margin-top:8px;background:#EAF3DE;border:1px solid #97C459;border-radius:8px;padding:10px">
+        <div style="font-size:10px;color:#3B6D11;margin-bottom:4px;font-weight:600">📋 คำสั่งสำหรับ Cowork (Copy แล้วไปวางใน Cowork ได้เลย)</div>
+        <div style="font-size:11px;color:#2c2c2a;line-height:1.8" id="coworkCmdText"></div>
+        <button class="btn btn-ghost" style="margin-top:6px;width:100%" onclick="copyCoworkCmd()">Copy คำสั่ง Cowork</button>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <span class="lbl">สคริปขายดีจาก Gemini (optional — Claude จะวิเคราะห์จุดขายให้)</span>
+      <textarea class="inp" id="competitorScript" placeholder="วางสคริปที่ถอดจาก Gemini มาได้เลย"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="step1Next()">ถัดไป → สร้าง Buyer Intent & USP</button>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="page" id="page2">
+  <div class="card">
+    <div class="card-title">🎯 Buyer Intent <span class="badge badge-blue">คัดเลือก</span><span class="sel-count" id="intentCount">0 เลือก</span></div>
+    <div class="item-list" id="intentList"><div style="font-size:12px;color:#b4b2a9;padding:8px">กำลังสร้าง...</div></div>
+    <div class="add-custom">
+      <input id="addIntent" placeholder="+ เพิ่ม Intent เองได้เลย">
+      <button onclick="addCustomIntent()">เพิ่ม</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⭐ Unique Selling Points <span class="badge badge-green">คัดเลือก</span><span class="sel-count" id="uspCount">0 เลือก</span></div>
+    <div class="item-list" id="uspList"><div style="font-size:12px;color:#b4b2a9;padding:8px">กำลังสร้าง...</div></div>
+    <div class="add-custom">
+      <input id="addUsp" placeholder="+ เพิ่ม USP เองได้เลย">
+      <button onclick="addCustomUsp()">เพิ่ม</button>
+    </div>
+  </div>
+  <div class="card" id="analysisCard" style="display:none">
+    <div class="card-title">📊 วิเคราะห์สคริปขายดี</div>
+    <div style="background:#f7f6f2;border:1px solid #e5e3dc;border-radius:8px;padding:10px;font-size:12px;line-height:1.8;white-space:pre-wrap" id="scriptAnalysis"></div>
+  </div>
+  <button class="btn btn-primary" onclick="step2Next()">ถัดไป → เขียน Body + จับคู่ Hook</button>
+</div>
+
+<!-- STEP 3 -->
+<div class="page" id="page3">
+  <div class="card">
+    <div class="card-title">✍️ Body Script <span class="badge badge-purple">Generated</span></div>
+    <div style="background:#f7f6f2;border:1px solid #e5e3dc;border-radius:8px;padding:10px;font-size:13px;line-height:1.8;white-space:pre-wrap" id="bodyScript">กำลังสร้าง...</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-ghost" onclick="copyEl('bodyScript')">📋 Copy</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="regenBody()">🔄 สร้างใหม่</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🪝 เลือก Hook <span class="badge badge-orange">เลือกได้มากกว่า 1 ต่อ Intent</span></div>
+    <div class="script-count-bar">
+      <div><div class="sc-num" id="selScriptCount">0</div><div class="sc-label">Scripts ที่เลือกแล้ว</div></div>
+      <div style="font-size:11px;color:#3B6D11">เป้าหมาย: <strong>15 Scripts</strong></div>
+      <div id="countStatus" style="font-size:11px;color:#888780">ยังต้องเลือกเพิ่ม 15</div>
+    </div>
+    <div id="hookMatchingList">กำลังสร้าง Hook...</div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" id="btnCombine" onclick="step3Next()" style="margin-top:0" disabled>Combine → สร้าง Scripts</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="page" id="page4">
+  <div class="card">
+    <div class="card-title">📝 Scripts <span class="badge badge-green" id="scriptBadge">0 Scripts</span></div>
+    <div id="scriptsList"></div>
+    <div class="next-set-bar" id="nextSetBar" style="display:none">
+      <div class="next-set-info">🔄 อยากได้ Script ชุดถัดไป? Claude จะสร้าง Hook ใหม่จาก Intent เดิม ไม่ซ้ำอันเดิม</div>
+      <button class="btn btn-secondary" style="white-space:nowrap" onclick="nextSet()">สร้าง 15 Scripts ถัดไป</button>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="step4Next()">ถัดไป → สร้าง Headline</button>
+</div>
+
+<!-- STEP 5 -->
+<div class="page" id="page5">
+  <div class="card">
+    <div class="card-title">🎨 Headlines <span class="badge badge-purple">Generated</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-green" onclick="copyAll()" style="flex:1">📋 Copy All — วางใน Google Doc ได้เลย</button>
+      <button class="btn btn-secondary" onclick="regenHeadlines()">🔄 สร้างใหม่</button>
+    </div>
+    <div id="headlineList">กำลังสร้าง...</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-header">
+    <h3>📋 สรุปงาน</h3>
+  </div>
+  <div class="sb-body" id="sbBody">
+    <div style="font-size:12px;color:#b4b2a9;text-align:center;padding:20px;line-height:1.8">เริ่มจาก Step 1<br>ใส่ข้อมูลสินค้าก่อนเลย</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="loading-overlay" id="loading">
+  <div class="typing"><span></span><span></span><span></span></div>
+  <div class="loading-text" id="loadingText">กำลังสร้าง...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+let S = {
+  productName:'', images:[], competitorScript:'',
+  intents:[], usps:[], selectedIntents:new Set(), selectedUsps:new Set(),
+  scriptAnalysis:'', bodyScript:'',
+  hookMatches:{}, // intentIdx -> [{cat, hook, selected}]
+  usedHooks:[], // track used hook combos
+  scripts:[], // [{num, intentText, cat, hook, body, cta, full}]
+  headlines:[],
+  setNum:1
+};
+
+const HOOK_CATS = {
+  Q:'Question', U:'Urgency', S:'Secret', P:'Promise', M:'Myth-Bust', N:'Negative'
+};
+
+const TIKTOK_POLICY = `กฎเหล็ก TikTok Policy ที่ต้องปฏิบัติทุก script:
+- ห้ามพูดถึงการลดน้ำหนัก ลดไขมัน เผาผลาญ ลดพุง โดยเด็ดขาด
+- ห้าม overclaim เช่น "รักษาโรค" "ผลลัพธ์ภายใน X วัน" "กินแล้วผอม"
+- ให้เน้น: รสชาติ ความอร่อย ความสะดวก คุณค่าโภชนาการ healthy lifestyle แทน
+- ตัวอย่างที่ถูก: "กินได้ทุกวัน รู้สึกดีตลอดวัน" / "อิ่มนาน ไม่ง้อของทานเล่น"`;
+
+// ============ IMAGE ============
+async function handleImages(input){
+  S.images=[];
+  const prev=document.getElementById('imgPreview');prev.innerHTML='';
+  for(const f of Array.from(input.files)){
+    const b64=await toB64(f);
+    S.images.push({b64:b64.split(',')[1],type:f.type});
+    const img=document.createElement('img');img.src=b64;img.className='img-thumb';prev.appendChild(img);
+  }
+  showToast(`เพิ่ม ${S.images.length} รูปแล้ว`);
+}
+function toB64(f){return new Promise((r,e)=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.onerror=e;rd.readAsDataURL(f);})}
+
+// ============ STEP 1 ============
+async function step1Next(){
+  S.productName=document.getElementById('productName').value.trim();
+  S.competitorScript=document.getElementById('competitorScript').value.trim();
+  if(!S.productName){showToast('ใส่ชื่อสินค้าก่อนนะครับ');return;}
+  goStep(2);
+  showLoading('กำลังสร้าง Buyer Intent & USP...');
+  const content=[];
+  S.images.forEach(img=>content.push({type:'image',source:{type:'base64',media_type:img.type,data:img.b64}}));
+  content.push({type:'text',text:`สินค้า: ${S.productName}\n\nสร้าง:\n1. Buyer Intent 30 ข้อ สำหรับสินค้านี้ ภาษาไทย ขึ้นต้นแต่ละข้อด้วย "- "\n2. USP 15 ข้อ ขึ้นต้นด้วย "* "\n\nตอบรูปแบบ:\nBUYER_INTENT:\n[30 ข้อ]\n\nUSP:\n[15 ข้อ]`});
+  try{
+    const res=await claude(content,'คุณเป็น copywriter เชี่ยวชาญ affiliate marketing TikTok อาหาร/สุขภาพ ตอบภาษาไทย');
+    parseIntentUsp(res);
+    if(S.competitorScript){
+      showLoading('กำลังวิเคราะห์สคริปขายดี...');
+      const an=await claude([{type:'text',text:`สคริปขายดีของ "${S.productName}":\n${S.competitorScript}\n\nสรุปจุดขายและคำพูดที่ทำให้ขายดี เพื่อนำไปเขียนสคริปใหม่ ภาษาไทย`}],'copywriter TikTok');
+      S.scriptAnalysis=an;document.getElementById('scriptAnalysis').textContent=an;
+      document.getElementById('analysisCard').style.display='block';
+    }
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message);}
+  hideLoading();updateSidebar();
+}
+
+function parseIntentUsp(text){
+  const im=text.match(/BUYER_INTENT:\n([\s\S]*?)(?:\n\nUSP:|$)/);
+  const um=text.match(/USP:\n([\s\S]*?)$/);
+  S.intents=im?im[1].split('\n').filter(l=>l.trim().startsWith('-')).map(l=>l.replace(/^-\s*/,'').trim()):[];
+  S.usps=um?um[1].split('\n').filter(l=>l.trim().startsWith('*')).map(l=>l.replace(/^\*\s*/,'').trim()):[];
+  renderIntents();renderUsps();
+}
+
+function renderIntents(){
+  document.getElementById('intentList').innerHTML=S.intents.map((t,i)=>`
+    <div class="item-row ${S.selectedIntents.has(i)?'sel':''}" id="ir${i}" onclick="togIntent(${i})">
+      <input type="checkbox" ${S.selectedIntents.has(i)?'checked':''} onclick="event.stopPropagation()">
+      <span class="item-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="item-text">${t}</span>
+    </div>`).join('');
+  document.getElementById('intentCount').textContent=S.selectedIntents.size+' เลือก';
+}
+
+function renderUsps(){
+  document.getElementById('uspList').innerHTML=S.usps.map((t,i)=>`
+    <div class="item-row ${S.selectedUsps.has(i)?'sel':''}" id="ur${i}" onclick="togUsp(${i})">
+      <input type="checkbox" ${S.selectedUsps.has(i)?'checked':''} onclick="event.stopPropagation()">
+      <span class="item-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="item-text">${t}</span>
+    </div>`).join('');
+  document.getElementById('uspCount').textContent=S.selectedUsps.size+' เลือก';
+}
+
+function togIntent(i){S.selectedIntents.has(i)?S.selectedIntents.delete(i):S.selectedIntents.add(i);renderIntents();updateSidebar();}
+function togUsp(i){S.selectedUsps.has(i)?S.selectedUsps.delete(i):S.selectedUsps.add(i);renderUsps();updateSidebar();}
+
+function addCustomIntent(){
+  const v=document.getElementById('addIntent').value.trim();if(!v)return;
+  S.intents.push(v);S.selectedIntents.add(S.intents.length-1);
+  document.getElementById('addIntent').value='';renderIntents();updateSidebar();showToast('เพิ่ม Intent แล้ว');
+}
+function addCustomUsp(){
+  const v=document.getElementById('addUsp').value.trim();if(!v)return;
+  S.usps.push(v);S.selectedUsps.add(S.usps.length-1);
+  document.getElementById('addUsp').value='';renderUsps();updateSidebar();showToast('เพิ่ม USP แล้ว');
+}
+
+// ============ STEP 2 → 3 ============
+async function step2Next(){
+  if(!S.selectedIntents.size){showToast('เลือก Intent ก่อนนะครับ');return;}
+  if(!S.selectedUsps.size){showToast('เลือก USP ก่อนนะครับ');return;}
+  goStep(3);
+  showLoading('กำลังเขียน Body Script...');
+  const si=[...S.selectedIntents].map(i=>S.intents[i]).join('\n');
+  const su=[...S.selectedUsps].map(i=>S.usps[i]).join('\n');
+  try{
+    const body=await claude([{type:'text',text:`เขียน Body Script TikTok สำหรับ "${S.productName}"\nขึ้นต้นว่า "ตัวนี้คือ..." อธิบายว่าคืออะไร ข้อดี จุดเด่น เหมาะกับใคร ภาษาพูดธรรมชาติ น่ากิน ไม่เกิน 45 วินาที\n\nBuyer Intent:\n${si}\n\nUSP:\n${su}\n\n${S.scriptAnalysis?'จุดขายจากสคริปขายดี:\n'+S.scriptAnalysis:''}\n\n${TIKTOK_POLICY}\n\nตอบแค่ script เลย ไม่ต้องมี intro`}],'copywriter TikTok อาหาร ตอบภาษาไทย');
+    S.bodyScript=body;document.getElementById('bodyScript').textContent=body;
+    showLoading('กำลังสร้าง Hook สำหรับแต่ละ Intent...');
+    await genHookMatching();
+  }catch(e){showToast('เกิดข้อผิดพลาด');}
+  hideLoading();
+}
+
+async function regenBody(){
+  showLoading('กำลังสร้าง Body ใหม่...');
+  const si=[...S.selectedIntents].map(i=>S.intents[i]).join('\n');
+  const su=[...S.selectedUsps].map(i=>S.usps[i]).join('\n');
+  try{
+    const body=await claude([{type:'text',text:`เขียน Body Script TikTok แบบใหม่สำหรับ "${S.productName}" ขึ้นต้นว่า "ตัวนี้คือ..." ภาษาพูดธรรมชาติ ไม่เกิน 45 วินาที\nIntent: ${si}\nUSP: ${su}\n${TIKTOK_POLICY}`}],'copywriter TikTok');
+    S.bodyScript=body;document.getElementById('bodyScript').textContent=body;
+  }catch(e){showToast('เกิดข้อผิดพลาด');}
+  hideLoading();
+}
+
+async function genHookMatching(isNextSet=false){
+  const intents=[...S.selectedIntents].map(i=>S.intents[i]);
+  const usedStr=isNextSet?`\n\nHook ที่ใช้ไปแล้ว (ห้ามซ้ำ):\n${S.usedHooks.map(h=>`- [${h.cat}] ${h.hook}`).join('\n')}`:'';
+  const prompt=`สำหรับสินค้า "${S.productName}" สร้าง Hook สำหรับแต่ละ Buyer Intent ด้านล่าง
+แต่ละ Intent ให้สร้าง Hook 6 อัน (หมวดละ 1) โดยเข้ากับ Intent นั้นๆ และต้องไม่ละเมิด TikTok Policy (ห้าม overclaim, ห้ามพูดเรื่องลดน้ำหนัก)
+
+หมวด Hook:
+Q = Question Hook (เปิดด้วยคำถาม)
+U = Urgency Hook (กระตุ้นการตัดสินใจ)
+S = Secret Hook (บอกความลับ)
+P = Promise Hook (ให้คำสัญญา)
+M = Myth-Busting Hook (ลบความเชื่อเดิม)
+N = Negative Hook (ข้อความเจ็บจี๊ด)
+
+${usedStr}
+
+ตอบรูปแบบนี้ทุก Intent:
+INTENT: [ข้อความ intent]
+Q: [hook]
+U: [hook]
+S: [hook]
+P: [hook]
+M: [hook]
+N: [hook]
+---
+
+Buyer Intents:
+${intents.map((t,i)=>`${i+1}. ${t}`).join('\n')}`;
+
+  const res=await claude([{type:'text',text:prompt}],'copywriter TikTok ตอบภาษาไทย');
+  parseHookMatching(res,isNextSet);
+}
+
+function parseHookMatching(text,isNextSet){
+  if(!isNextSet) S.hookMatches={};
+  const blocks=text.split('---').filter(b=>b.trim());
+  const intents=[...S.selectedIntents].map(i=>S.intents[i]);
+  blocks.forEach((block,idx)=>{
+    if(idx>=intents.length)return;
+    const intentIdx=[...S.selectedIntents][idx];
+    const hooks=[];
+    Object.keys(HOOK_CATS).forEach(cat=>{
+      const m=block.match(new RegExp(cat+':\\s*(.+)'));
+      if(m)hooks.push({cat,hook:m[1].trim(),selected:false});
+    });
+    if(!S.hookMatches[intentIdx])S.hookMatches[intentIdx]=[];
+    S.hookMatches[intentIdx].push(...hooks);
+  });
+  renderHookMatching();
+}
+
+function renderHookMatching(){
+  const intents=[...S.selectedIntents];
+  document.getElementById('hookMatchingList').innerHTML=intents.map(intentIdx=>`
+    <div class="intent-block">
+      <div class="intent-label">💡 ${S.intents[intentIdx]}</div>
+      <div class="hook-options">
+        ${(S.hookMatches[intentIdx]||[]).map((h,hi)=>`
+          <div class="hook-option ${h.selected?'sel':''}" onclick="togHook(${intentIdx},${hi})">
+            <input type="checkbox" ${h.selected?'checked':''} onclick="event.stopPropagation()">
+            <span class="hook-cat ${h.cat}">${h.cat} · ${HOOK_CATS[h.cat]}</span>
+            <div style="flex:1">
+              <div class="hook-text">${h.hook}</div>
+              <div class="body-preview">↓ ${S.bodyScript.substring(0,80)}...</div>
+            </div>
+          </div>`).join('')}
+        <div class="add-custom" style="margin-top:4px">
+          <input id="ch_${intentIdx}" placeholder="+ Hook เองได้เลย">
+          <button onclick="addCustomHook(${intentIdx})">เพิ่ม</button>
+        </div>
+      </div>
+    </div>`).join('');
+  updateScriptCount();
+}
+
+function togHook(intentIdx,hi){
+  S.hookMatches[intentIdx][hi].selected=!S.hookMatches[intentIdx][hi].selected;
+  renderHookMatching();
+}
+
+function addCustomHook(intentIdx){
+  const inp=document.getElementById('ch_'+intentIdx);
+  const v=inp.value.trim();if(!v)return;
+  if(!S.hookMatches[intentIdx])S.hookMatches[intentIdx]=[];
+  S.hookMatches[intentIdx].push({cat:'C',hook:v,selected:true});
+  inp.value='';renderHookMatching();showToast('เพิ่ม Hook แล้ว');
+}
+
+function updateScriptCount(){
+  let count=0;
+  Object.values(S.hookMatches).forEach(hooks=>hooks.forEach(h=>{if(h.selected)count++;}));
+  document.getElementById('selScriptCount').textContent=count;
+  const left=15-count;
+  document.getElementById('countStatus').textContent=left>0?`ยังต้องเลือกเพิ่ม ${left}`:(count>15?`เกิน ${count-15} — ลองเอาออกบ้าง`:'✅ ครบ 15 แล้ว!');
+  document.getElementById('countStatus').style.color=count===15?'#3B6D11':count>15?'#993C1D':'#888780';
+  document.getElementById('btnCombine').disabled=count===0;
+}
+
+// ============ STEP 3 → 4 ============
+function step3Next(){
+  const combined=[];
+  let num=1;
+  Object.entries(S.hookMatches).forEach(([intentIdx,hooks])=>{
+    hooks.filter(h=>h.selected).forEach(h=>{
+      const full=`${h.hook}\n${S.bodyScript}`;
+      combined.push({num:num++,intentText:S.intents[intentIdx],cat:h.cat,hook:h.hook,body:S.bodyScript,full});
+      S.usedHooks.push({cat:h.cat,hook:h.hook});
+    });
+  });
+  S.scripts=combined;
+  goStep(4);
+  renderScripts();
+}
+
+function renderScripts(){
+  const el=document.getElementById('scriptsList');
+  document.getElementById('scriptBadge').textContent=S.scripts.length+' Scripts';
+  el.innerHTML=S.scripts.map((sc,i)=>`
+    <div class="script-item">
+      <div class="script-header">
+        <span class="script-num">Script ${sc.num} · <span class="hook-cat ${sc.cat}" style="display:inline">${HOOK_CATS[sc.cat]||'Custom'}</span></span>
+        <div style="display:flex;gap:6px">
+          <button class="btn-ghost" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid #e5e3dc;background:#f7f6f2;cursor:pointer" onclick="copyScript(${i})">📋</button>
+          <button class="btn-ghost" style="font-size:10px;padding:3px 8px;border-radius:6px;border:1px solid #FAECE7;background:#FAECE7;color:#993C1D;cursor:pointer" onclick="removeScript(${i})">✕ เอาออก</button>
+        </div>
+      </div>
+      <textarea class="script-textarea" id="st${i}" onchange="S.scripts[${i}].full=this.value">${sc.full}</textarea>
+    </div>`).join('');
+  document.getElementById('nextSetBar').style.display='flex';
+  updateSidebar();
+}
+
+function removeScript(i){
+  S.scripts.splice(i,1);
+  S.scripts.forEach((s,idx)=>s.num=idx+1);
+  renderScripts();showToast('เอาออกแล้ว');
+}
+
+function copyScript(i){
+  navigator.clipboard.writeText(document.getElementById('st'+i).value).then(()=>showToast('Copy Script '+S.scripts[i].num+' แล้ว'));
+}
+
+async function nextSet(){
+  showLoading('กำลังสร้าง Hook ชุดใหม่...');
+  S.setNum++;
+  try{await genHookMatching(true);}catch(e){showToast('เกิดข้อผิดพลาด');}
+  hideLoading();
+  goStep(3);showToast('Hook ชุดใหม่พร้อมแล้ว ไปเลือกเพิ่มได้เลยครับ');
+}
+
+// ============ STEP 4 → 5 ============
+async function step4Next(){
+  // sync script edits
+  S.scripts.forEach((sc,i)=>{const el=document.getElementById('st'+i);if(el)sc.full=el.value;});
+  goStep(5);
+  showLoading('กำลังสร้าง Headline...');
+  await genHeadlines();
+  hideLoading();
+}
+
+async function genHeadlines(){
+  const allScripts=S.scripts.map(sc=>`${sc.num}:\n${sc.full}`).join('\n\n---\n\n');
+  const prompt=`คุณคือ Copywriter และผู้เชี่ยวชาญด้านการทำคอนเทนต์วิดีโอสั้น (TikTok/Reels) ที่เก่งเรื่องการเขียน "Hook" หยุดนิ้วคนดูให้หยุดดูคลิปตั้งแต่ 3 วินาทีแรก
+
+หน้าที่ของคุณ: อ่านสคริปต์วิดีโอที่ให้มา แล้วคิดข้อความพาดหัว (Headline) สำหรับใส่หน้าปกคลิปวิดีโอ โดยมีเงื่อนไขดังนี้:
+1. ต้องแบ่งเป็น 2 บรรทัด (บรรทัดบน และ บรรทัดล่าง)
+2. ข้อความต้องสั้น กระชับ อ่านปุ๊บเข้าใจปั๊บ กระตุ้นความอยากรู้ หรือขยี้ Pain point ของคนดู
+3. ใช้ภาษาที่เป็นธรรมชาติ น่าสนใจ และหยุดนิ้วคนดูได้ทันที
+4. ${TIKTOK_POLICY}
+
+รูปแบบผลลัพธ์ (ทำทุก Script):
+(${S.productName}) Script [เลข]
+Headline
+[บรรทัดบน]
+[บรรทัดล่าง]
+
+Script
+[เนื้อหาสคริปต์]
+
+---
+
+สคริปต์ทั้งหมด:
+${allScripts}`;
+
+  try{
+    const res=await claude([{type:'text',text:prompt}],'Copywriter TikTok ตอบภาษาไทย',2000);
+    S.headlines=res;
+    renderHeadlines(res);
+  }catch(e){showToast('เกิดข้อผิดพลาด');}
+}
+
+function renderHeadlines(text){
+  document.getElementById('headlineList').innerHTML='<div style="background:#f7f6f2;border:1px solid #e5e3dc;border-radius:8px;padding:12px;font-size:12px;line-height:2;white-space:pre-wrap">'+text+'</div>';
+}
+
+async function regenHeadlines(){
+  showLoading('กำลังสร้าง Headline ใหม่...');
+  await genHeadlines();
+  hideLoading();
+}
+
+function copyAll(){
+  navigator.clipboard.writeText(S.headlines).then(()=>showToast('Copy ทั้งหมดแล้ว! วางใน Google Doc ได้เลยครับ'));
+}
+
+// ============ SAVE / LOAD ============
+function saveProject(){
+  const data={...S,selectedIntents:[...S.selectedIntents],selectedUsps:[...S.selectedUsps],savedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`${S.productName||'project'}_${new Date().toLocaleDateString('th-TH').replace(/\//g,'-')}.json`;
+  a.click();showToast('บันทึกแล้ว!');
+}
+
+function loadProject(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      S={...d,selectedIntents:new Set(d.selectedIntents||[]),selectedUsps:new Set(d.selectedUsps||[])};
+      document.getElementById('productName').value=S.productName||'';
+      document.getElementById('competitorScript').value=S.competitorScript||'';
+      renderIntents();renderUsps();
+      if(S.bodyScript)document.getElementById('bodyScript').textContent=S.bodyScript;
+      if(S.hookMatches&&Object.keys(S.hookMatches).length)renderHookMatching();
+      if(S.scripts.length)renderScripts();
+      if(S.headlines)renderHeadlines(S.headlines);
+      updateSidebar();
+      showToast('โหลดโปรเจกต์แล้ว: '+S.productName);
+    }catch(e){showToast('ไฟล์ไม่ถูกต้อง');}
+  };
+  r.readAsText(f);
+}
+
+// ============ SIDEBAR ============
+function updateSidebar(){
+  const el=document.getElementById('sbBody');
+  let h='';
+  if(S.productName)h+=`<div class="sum-item"><div class="sum-lbl">สินค้า</div><div class="sum-val">${S.productName}</div></div>`;
+  if(S.selectedIntents.size)h+=`<div class="sum-item"><div class="sum-lbl">Intent ที่เลือก (${S.selectedIntents.size})</div><div class="sum-val">${[...S.selectedIntents].map(i=>`• ${S.intents[i]}`).join('<br>')}</div></div>`;
+  if(S.selectedUsps.size)h+=`<div class="sum-item"><div class="sum-lbl">USP ที่เลือก (${S.selectedUsps.size})</div><div class="sum-val">${[...S.selectedUsps].map(i=>`• ${S.usps[i]}`).join('<br>')}</div></div>`;
+  if(S.bodyScript)h+=`<div class="sum-item"><div class="sum-lbl">Body Script</div><div class="sum-val">${S.bodyScript.substring(0,150)}...</div></div>`;
+  if(S.scripts.length)h+=`<div class="sum-item"><div class="sum-lbl">Scripts</div><div class="sum-val" style="color:#3B6D11;font-weight:600">${S.scripts.length} Scripts พร้อมใช้ ✓</div></div>`;
+  el.innerHTML=h||'<div style="font-size:12px;color:#b4b2a9;text-align:center;padding:20px">ยังไม่มีข้อมูล</div>';
+}
+
+// ============ UTILS ============
+async function claude(content,system='',maxTokens=1000){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,system,messages:[{role:'user',content}]})});
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return d.content.map(c=>c.text||'').join('');
+}
+
+function copyTikTokLinks(){
+  const links=[];
+  for(let i=0;i<6;i++){
+    const v=document.getElementById('tl'+i).value.trim();
+    if(v)links.push(v);
+  }
+  if(!links.length){showToast('ใส่ลิงค์ก่อนนะครับ');return;}
+  const cmd=`เปิด ssstik.io แล้วโหลดคลิป TikTok ทีละลิงค์ต่อไปนี้ลงใน folder Sale Content ที่อยู่ใน Content อาหาร ใน Claude Cowork บน Desktop:\n${links.map((l,i)=>`${i+1}. ${l}`).join('\n')}`;
+  navigator.clipboard.writeText(links.join('\n')).then(()=>{
+    showToast(`Copy ${links.length} ลิงค์แล้ว!`);
+    document.getElementById('coworkCmdText').textContent=cmd;
+    document.getElementById('coworkCmd').style.display='block';
+  });
+}
+function copyCoworkCmd(){
+  const t=document.getElementById('coworkCmdText').textContent;
+  navigator.clipboard.writeText(t).then(()=>showToast('Copy คำสั่ง Cowork แล้ว!'));
+}
+function goStep(n){
+  for(let i=1;i<=5;i++){
+    document.getElementById('page'+i).classList.toggle('active',i===n);
+    const s=document.getElementById('s'+i);
+    s.classList.remove('active','done');
+    if(i===n)s.classList.add('active');
+    else if(i<n)s.classList.add('done');
+  }
+}
+
+function showLoading(t){document.getElementById('loadingText').textContent=t;document.getElementById('loading').classList.add('show');}
+function hideLoading(){document.getElementById('loading').classList.remove('show');}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+function copyEl(id){navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>showToast('Copy แล้ว!'));}
+</script>
+</body>
+</html>
